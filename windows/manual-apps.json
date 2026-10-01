@@ -1,0 +1,10 @@
+[
+  {
+    "name": "OpenChamber",
+    "publisher": "OpenChamber",
+    "source": "https://github.com/openchamber/openchamber/releases",
+    "role": "OpenCode GUI",
+    "observedVersion": "2.0.2",
+    "installPolicy": "manual-official-release"
+  }
+]

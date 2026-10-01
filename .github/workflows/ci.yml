@@ -1,0 +1,28 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    uses: simpsonm09-org/simpsonm09-repo-standard/.github/workflows/lint.yml@52061d685bfca4cf0c2ac28926acdcb313680bc4 # repo-standard main
+  aislop:
+    permissions:
+      contents: read
+      security-events: write
+    uses: simpsonm09-org/simpsonm09-repo-standard/.github/workflows/aislop.yml@52061d685bfca4cf0c2ac28926acdcb313680bc4 # repo-standard main
+  security:
+    permissions:
+      contents: read
+      security-events: write
+    uses: simpsonm09-org/simpsonm09-repo-standard/.github/workflows/security.yml@52061d685bfca4cf0c2ac28926acdcb313680bc4 # repo-standard main
+
+  standard:
+    permissions:
+      contents: read
+    uses: simpsonm09-org/simpsonm09-repo-standard/.github/workflows/standard.yml@52061d685bfca4cf0c2ac28926acdcb313680bc4 # repo-standard main

@@ -1,0 +1,19 @@
+# Noctty terminal configuration (Ghostty format).
+# Snapshot source: dev-setup-starter/settings/windows/noctty/config.ghostty
+# Applied by scripts/Apply-NocttySettings.ps1.
+
+font-size = 13
+window-padding-x = 8
+window-padding-y = 6
+copy-on-select = clipboard
+mouse-hide-while-typing = true
+confirm-close-surface = false
+
+# Start the first window in the workspace root. Applies to new windows;
+# restored sessions reuse the working directory saved with the session.
+working-directory = D:\dev\simpsonm09
+
+# Notify when a long command finishes in an unfocused surface.
+# Useful for agent runs and builds. Notifications only, no bell.
+notify-on-command-finish = unfocused
+notify-on-command-finish-action = no-bell,notify

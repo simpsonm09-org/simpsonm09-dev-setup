@@ -1,0 +1,24 @@
+# Template for the workspace-root .envrc at D:\dev\simpsonm09\.envrc.
+# Copy it there and run `direnv allow` in the workspace root.
+# One file covers every repo under projects/repos; direnv walks up from the
+# current directory. This is WSL-only, because direnv has no PowerShell hook.
+
+# 1. Load the bootstrap file: the Infisical machine identity and the fallback
+#    integration values while Infisical is adopted.
+_env_file="projects/repos/simpsonm09-dev-setup/settings/.env"
+dotenv_if_exists "$_env_file"
+watch_file "$_env_file"
+
+# 2. Pull the real values from Infisical. The CLI logs in with the machine
+#    identity from the environment, then reads the project's environment. A
+#    failure is reported instead of swallowed, so a broken loader is visible,
+#    and the .env fallback stays in effect.
+if has infisical && [ -n "${INFISICAL_UNIVERSAL_AUTH_CLIENT_ID:-}" ]; then
+  if _token="$(infisical login --method=universal-auth --plain --silent 2>/dev/null)" \
+     && _values="$(infisical export --token "$_token" --projectId "${INFISICAL_PROJECT_ID:-}" --env "${INFISICAL_ENV:-dev}" --format=dotenv-eval --silent 2>/dev/null)"; then
+    eval "$_values"
+  else
+    echo "direnv: infisical export failed; using .env values only" >&2
+  fi
+  unset _token _values
+fi

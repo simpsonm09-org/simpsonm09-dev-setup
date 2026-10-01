@@ -1,0 +1,39 @@
+{
+  "base_keymap": "JetBrains",
+  "buffer_font_size": 15,
+  "ui_font_size": 16,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "One Dark"
+  },
+  "session": {
+    "trust_all_worktrees": false
+  },
+  "line_ending": "prefer_lf",
+  "ensure_final_newline_on_save": true,
+  "format_on_save": "on",
+  "autosave": "on_focus_change",
+  "tab_size": 2,
+  "hard_tabs": false,
+  "soft_wrap": "editor_width",
+  "preferred_line_length": 100,
+  "wrap_guides": [100],
+  "diff_view_style": "split",
+  "git": {
+    "inline_blame": {
+      "enabled": true
+    }
+  },
+  "edit_predictions": {
+    "provider": "none"
+  },
+  "disable_ai": false,
+  "agent": {
+    "flexible": true,
+    "default_width": 640
+  },
+  "terminal": {
+    "font_size": 14
+  }
+}

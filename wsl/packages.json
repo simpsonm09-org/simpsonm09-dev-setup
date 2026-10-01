@@ -1,0 +1,28 @@
+{
+  "ubuntuRelease": "26.04",
+  "aptPackages": [
+    "git",
+    "curl",
+    "ca-certificates",
+    "unzip",
+    "gnupg",
+    "gh"
+  ],
+  "optionalAptProfiles": {
+    "dockerEngine": [
+      "docker-ce",
+      "docker-ce-cli",
+      "containerd.io",
+      "docker-buildx-plugin",
+      "docker-compose-plugin"
+    ]
+  },
+  "packagePolicy": "latest from configured apt sources",
+  "manualTools": {
+    "opencode": {
+      "observedVersion": "2.0.18",
+      "updateCommand": "opencode upgrade",
+      "managedByBootstrap": false
+    }
+  }
+}

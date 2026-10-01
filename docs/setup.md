@@ -1,0 +1,13 @@
+# Safe setup order
+
+PowerShell commands in these docs run on Windows with `pwsh` (PowerShell 7). From WSL, invoke them as `pwsh.exe -File 'D:\...'`. They resolve Windows paths and talk to the Windows OpenChamber API, so a Linux `pwsh` does not work, and Windows PowerShell 5.1 (`powershell.exe`) does not populate `$PSScriptRoot` for scripts that use it in parameter defaults.
+
+1. Review the README and the per-platform instructions.
+2. On each Windows device, run `windows/Install-Apps.ps1` in audit mode first. It verifies `D:` and inventories supported winget packages; it does not install anything unless `-Install` is supplied.
+3. Run the WSL bootstrap in audit mode: `bash wsl/bootstrap.sh`. To install its listed packages, explicitly use `bash wsl/bootstrap.sh --install`; `sudo` may prompt.
+4. Docker Engine is installed from Docker's official apt repository. On a machine with constrained `C:` space, move the Ubuntu VHDX to `D:` before installing Engine. Verify `hello-world`, Compose, and a `D:` bind mount. Where the VHDX lives is per machine; see the machine profiles.
+5. After installing Zed, run `windows/Apply-Settings.ps1` to preview the portable global Zed baseline; use `-Apply` to back up and apply it.
+6. Clone the fleet into `projects/repos`. From this repository, `just workspace --apply` clones every repository in the `repo-catalog` roster and sets the `upstream` remote. The next step needs the `maxstack` and `pstack-opencode-plugin` checkouts.
+7. OpenCode and PStack configuration lives in `maxstack`. Install the workspace bundle with `maxstack/scripts/Install-Workspace.ps1 -Apply`, which writes the model, agent, permission, and plugin settings into the `D:\dev\simpsonm09` workspace only. This repository no longer owns OpenCode configuration.
+8. Sign into GitHub Desktop, `gh`, OpenCode, OneNote, Postman, and OpenChamber locally as needed. Never paste credentials into this repository or commit them.
+9. Create and verify one sample worktree and test Zed against a project on the D: mount before using this location for I/O-heavy container builds.

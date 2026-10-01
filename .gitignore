@@ -1,0 +1,39 @@
+# Local/device state and credentials
+.local/
+.env
+.env.*
+!.env.example
+secrets.env
+.envrc.local
+*.local.json
+*.local.yaml
+*.local.yml
+auth.json
+credentials.json
+token.json
+
+# OS/editor noise
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# Installer/cache output
+*.msi
+*.exe
+*.deb
+*.zip
+*.tar.gz
+
+# Machine-specific snapshot output (kept local)
+docs/*.snapshot.json
+
+# Local scan output
+*.sarif
+aislop.sarif
+trivy.sarif
+
+# Local tool state
+.aislop/history.jsonl
+.aislop/agent/

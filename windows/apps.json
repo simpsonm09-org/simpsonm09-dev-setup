@@ -1,0 +1,76 @@
+[
+  {
+    "name": "Google Chrome",
+    "id": "Google.Chrome",
+    "source": "winget",
+    "role": "Default development browser",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "vendor-auto-update"
+  },
+  {
+    "name": "GitHub Desktop",
+    "id": "GitHub.GitHubDesktop",
+    "source": "winget",
+    "role": "Routine Git pull/push UI",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
+    "name": "Noctty",
+    "id": "AmanThanvi.winghostty",
+    "source": "winget",
+    "role": "Terminal",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest",
+    "installedAliases": ["Noctty"]
+  },
+  {
+    "name": "Sublime Text 4",
+    "id": "SublimeHQ.SublimeText.4",
+    "source": "winget",
+    "role": "Text editing",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
+    "name": "Zed",
+    "id": "ZedIndustries.Zed",
+    "source": "winget",
+    "role": "IDE",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
+    "name": "Postman",
+    "id": "Postman.Postman",
+    "source": "winget",
+    "role": "API testing",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
+    "name": "Docker Desktop",
+    "id": "Docker.DockerDesktop",
+    "source": "winget",
+    "role": "Linux containers through WSL2",
+    "installByDefault": false,
+    "requiresExplicitOptIn": true,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
+    "name": "OneNote",
+    "id": "XPFFZHVGQWWLHB",
+    "source": "msstore",
+    "role": "Notes; current OneNote app",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "store-managed"
+  }
+]
