@@ -27,6 +27,10 @@ lint-fix:
 aislop:
     npx --yes aislop@0.16.1 ci
 
+# Check the workspace wiring without cloning anything.
+test:
+    node scripts/workspace.mjs
+
 # Lint and run the AI-slop gate.
 verify: lint aislop
 
