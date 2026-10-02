@@ -1,6 +1,6 @@
 # Secrets
 
-Secrets stay out of the repositories. Config references them by environment variable name, and the value comes from Infisical.
+Secrets stay out of the repositories. Config references a value by environment variable name. A non-secret value, including PII and machine configuration, lives in the gitignored `settings/.env` bootstrap; a secret lives in Infisical.
 
 ## Infisical is the source of truth
 
@@ -8,9 +8,26 @@ Self-hosted Infisical runs as a container on the WSL Docker Engine at `http://lo
 
 One machine identity uses **Universal Auth**. It has the Viewer role on the project, so it can read secrets and nothing else. Its client ID and secret are the only secret-zero values, and they live in `settings/.env`.
 
-## Integration keys
+## Integration values
 
-The `dev` environment holds the keys the integration CLIs read. Add a key here, then rerun the loader so the runtime inherits it.
+A personal value has one of three sources. Infer from the tool when it already knows the value, such as the GitHub account from `gh auth status` or the Kubernetes context from `kubectl config current-context`. Put a non-secret value, including PII and machine configuration, in the gitignored `settings/.env`. Put a secret in Infisical.
+
+## Non-secret values: `settings/.env`
+
+The bootstrap file holds these next to the Infisical machine identity. It is gitignored and never committed.
+
+| Key | Used by |
+| --- | --- |
+| `VAULT_ADDR`, `VAULT_NAMESPACE` | `vault` |
+| `JIRA_SITE`, `JIRA_PROJECT` | `acli` |
+| `JENKINS_URL`, `JENKINS_USER` | the Jenkins CLI |
+| `POSTMAN_WORKSPACE` | `postman` |
+| `GMAIL_ADDRESS` | `himalaya` |
+| `SMS_GATEWAY_HOST` | `smsgate` |
+
+## Secrets: Infisical
+
+The `dev` environment holds the secrets. Add a key in Infisical, then rerun the loader so the runtime inherits it.
 
 | Key | Used by |
 | --- | --- |
@@ -18,16 +35,16 @@ The `dev` environment holds the keys the integration CLIs read. Add a key here, 
 | `DISCORD_BOT_TOKEN` | `discli` |
 | `GMAIL_APP_PASSWORD` | `himalaya` |
 | `NTFY_TOPIC`, `NTFY_TOKEN` | `ntfy` |
-| `SMS_GATEWAY_HOST`, `SMS_GATEWAY_USER`, `SMS_GATEWAY_PASSWORD` | `smsgate` |
-| `VAULT_ADDR`, `VAULT_NAMESPACE`, `VAULT_TOKEN` | `vault` |
-| `JENKINS_USER`, `JENKINS_API_TOKEN` | the Jenkins CLI |
+| `SMS_GATEWAY_USER`, `SMS_GATEWAY_PASSWORD` | `smsgate` |
+| `VAULT_TOKEN` | `vault` |
+| `JENKINS_API_TOKEN` | the Jenkins CLI |
 | `JIRA_API_TOKEN` | `acli` |
 
-Only the key names are recorded here. The values live in Infisical and never in a repository.
+Only the key names are recorded here. A secret value lives in Infisical and never in a repository.
 
 ## The bootstrap file
 
-`settings/.env` is the bootstrap. It holds the Infisical instance, the project ID, and the machine identity. It is gitignored; only [`../settings/.env.example`](../settings/.env.example) is committed.
+`settings/.env` is the bootstrap. It holds the Infisical instance, the project ID, the machine identity, and the non-secret personal values. The loaders export every key that is not prefixed `INFISICAL_`, then overlay the Infisical export, so an Infisical value overrides a same-name `.env` value. It is gitignored; only [`../settings/.env.example`](../settings/.env.example) is committed.
 
 - Windows path: `D:\dev\simpsonm09\projects\repos\simpsonm09-dev-setup\settings\.env`
 - WSL path: `/mnt/d/dev/simpsonm09/projects/repos/simpsonm09-dev-setup/settings/.env`
