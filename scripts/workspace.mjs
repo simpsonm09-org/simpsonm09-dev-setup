@@ -82,6 +82,34 @@ function addUpstream(name) {
   return spawn('git', ['remote', 'add', 'upstream', url], dir);
 }
 
+function refExists(dir, ref) {
+  return spawnSync('git', ['rev-parse', '--verify', '--quiet', ref], { cwd: dir }).status === 0;
+}
+
+// A history rewrite (filter-repo) or a rebuilt branch drops branch.main.*, which
+// makes main look unpublished in GitHub Desktop. Re-establish it on every run.
+function ensureTracking(name) {
+  const dir = join(reposDir, name);
+  if (!existsSync(join(dir, '.git'))) {
+    return true;
+  }
+  if (!refExists(dir, 'refs/heads/main') || !refExists(dir, 'refs/remotes/origin/main')) {
+    return true;
+  }
+  const result = spawnSync(
+    'git',
+    ['for-each-ref', '--format=%(upstream:short)', 'refs/heads/main'],
+    { cwd: dir, encoding: 'utf8' },
+  );
+  if ((result.stdout ?? '').trim() === 'origin/main') {
+    return true;
+  }
+  if (!act('track', `${name}  main -> origin/main`)) {
+    return true;
+  }
+  return spawn('git', ['branch', '--set-upstream-to=origin/main', 'main'], dir);
+}
+
 function runInstaller() {
   const installer = join(reposDir, 'simpsonm09-maxstack', 'scripts', 'Install-Workspace.ps1');
   if (!act('install', installer)) {
@@ -119,8 +147,10 @@ function main() {
   for (const name of names) {
     clone(name);
     addUpstream(name);
+    ensureTracking(name);
   }
   addUpstream(ROSTER_REPO);
+  ensureTracking(ROSTER_REPO);
 
   if (install) {
     runInstaller();
