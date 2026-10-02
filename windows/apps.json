@@ -72,5 +72,32 @@
     "installByDefault": true,
     "version": null,
     "versionPolicy": "store-managed"
+  },
+  {
+    "name": "Kubernetes CLI",
+    "id": "Kubernetes.kubectl",
+    "source": "winget",
+    "role": "Developer CLI: Kubernetes objects",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
+    "name": "Helm",
+    "id": "Helm.Helm",
+    "source": "winget",
+    "role": "Developer CLI: Kubernetes packaging",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
+    "name": "HashiCorp Vault",
+    "id": "Hashicorp.Vault",
+    "source": "winget",
+    "role": "Developer CLI: Vault secrets",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest"
   }
 ]

@@ -8,6 +8,23 @@ Self-hosted Infisical runs as a container on the WSL Docker Engine at `http://lo
 
 One machine identity uses **Universal Auth**. It has the Viewer role on the project, so it can read secrets and nothing else. Its client ID and secret are the only secret-zero values, and they live in `settings/.env`.
 
+## Integration keys
+
+The `dev` environment holds the keys the integration CLIs read. Add a key here, then rerun the loader so the runtime inherits it.
+
+| Key | Used by |
+| --- | --- |
+| `POSTMAN_API_KEY` | `postman login --with-api-key` |
+| `DISCORD_BOT_TOKEN` | `discli` |
+| `GMAIL_APP_PASSWORD` | `himalaya` |
+| `NTFY_TOPIC`, `NTFY_TOKEN` | `ntfy` |
+| `SMS_GATEWAY_HOST`, `SMS_GATEWAY_USER`, `SMS_GATEWAY_PASSWORD` | `smsgate` |
+| `VAULT_ADDR`, `VAULT_NAMESPACE`, `VAULT_TOKEN` | `vault` |
+| `JENKINS_USER`, `JENKINS_API_TOKEN` | the Jenkins CLI |
+| `JIRA_API_TOKEN` | `acli` |
+
+Only the key names are recorded here. The values live in Infisical and never in a repository.
+
 ## The bootstrap file
 
 `settings/.env` is the bootstrap. It holds the Infisical instance, the project ID, and the machine identity. It is gitignored; only [`../settings/.env.example`](../settings/.env.example) is committed.
