@@ -6,8 +6,8 @@
 // Prints the plan by default. Writes only with --apply or --install.
 // See docs/project-workflow.md.
 
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { chmodSync, copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const args = process.argv.slice(2);
@@ -110,6 +110,29 @@ function ensureTracking(name) {
   return spawn('git', ['branch', '--set-upstream-to=origin/main', 'main'], dir);
 }
 
+// Install the agent access push guard from repo-standard into a clone. The hook
+// resolves the repository's level at push time, so one file serves every
+// repository. See repo-standard docs/features/agent-access.md.
+function installHook(name) {
+  const dir = join(reposDir, name);
+  if (!existsSync(join(dir, '.git'))) {
+    return true;
+  }
+  const source = join(reposDir, 'simpsonm09-repo-standard', 'templates', 'hooks', 'pre-push');
+  if (!existsSync(source)) {
+    process.stdout.write(`note  ${source} is missing, so ${name} gets no pre-push hook\n`);
+    return true;
+  }
+  const target = join(dir, '.git', 'hooks', 'pre-push');
+  if (!act('hook', `${name}  pre-push`)) {
+    return true;
+  }
+  mkdirSync(dirname(target), { recursive: true });
+  copyFileSync(source, target);
+  chmodSync(target, 0o755);
+  return true;
+}
+
 function runInstaller() {
   const installer = join(reposDir, 'simpsonm09-maxstack', 'scripts', 'Install-Workspace.ps1');
   if (!act('install', installer)) {
@@ -151,6 +174,10 @@ function main() {
   }
   addUpstream(ROSTER_REPO);
   ensureTracking(ROSTER_REPO);
+
+  for (const name of [...names, ROSTER_REPO]) {
+    installHook(name);
+  }
 
   if (install) {
     runInstaller();
