@@ -106,7 +106,8 @@
       },
       "wsl": {
         "manager": "snap",
-        "package": "ghostty"
+        "package": "ghostty",
+        "classic": true
       },
       "macos": {
         "manager": "brew",
@@ -165,11 +166,11 @@
       "kind": "app",
       "policy": "latest",
       "note": "Both machines run Docker Engine inside Ubuntu WSL2; Docker Desktop is opt-in only.",
+      "installByDefault": false,
+      "requiresExplicitOptIn": true,
       "windows": {
         "manager": "winget",
-        "id": "Docker.DockerDesktop",
-        "installByDefault": false,
-        "requiresExplicitOptIn": true
+        "id": "Docker.DockerDesktop"
       },
       "wsl": {
         "manager": "apt",
@@ -184,7 +185,7 @@
       },
       "macos": {
         "manager": "brew",
-        "cask": "docker"
+        "cask": "docker-desktop"
       }
     },
     {

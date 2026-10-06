@@ -17,6 +17,8 @@
 #       manager    winget | msstore | scoop | brew | apt | snap | npm | manual
 #       id         winget/msstore package id
 #       package    scoop/apt/snap/npm package
+#       packages   multi-package apt/snap/npm section, as a list
+#       classic    snap only; install with --classic
 #       formula/cask  brew formula or cask
 #       url        manual download page
 #       fallback   ordered chain tried when the primary manager lacks the package
@@ -111,6 +113,7 @@ tools:
     wsl:
       manager: snap
       package: ghostty
+      classic: true
     macos:
       manager: brew
       cask: ghostty
@@ -157,11 +160,11 @@ tools:
     kind: app
     policy: latest
     note: Both machines run Docker Engine inside Ubuntu WSL2; Docker Desktop is opt-in only.
+    installByDefault: false
+    requiresExplicitOptIn: true
     windows:
       manager: winget
       id: Docker.DockerDesktop
-      installByDefault: false
-      requiresExplicitOptIn: true
     wsl:
       manager: apt
       profile: dockerEngine
@@ -173,7 +176,7 @@ tools:
         - docker-compose-plugin
     macos:
       manager: brew
-      cask: docker
+      cask: docker-desktop
 
   - id: onenote
     name: OneNote

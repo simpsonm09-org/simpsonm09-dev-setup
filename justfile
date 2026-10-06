@@ -30,7 +30,7 @@ aislop:
 # Check the workspace wiring without cloning anything.
 test:
     node scripts/workspace.mjs
-    node --test scripts/tools.test.mjs
+    node --test scripts/tools.test.mjs scripts/lib/yaml.test.mjs
 
 # Print this host's tool install plan and change nothing.
 tools:

@@ -18,14 +18,36 @@
     ]
   },
   "snapPackages": [
-    "ghostty"
+    {
+      "id": "terminal",
+      "package": "ghostty",
+      "classic": true
+    }
+  ],
+  "npmPackages": [
+    {
+      "id": "postman-cli",
+      "package": "postman-cli"
+    },
+    {
+      "id": "newman",
+      "package": "newman"
+    }
   ],
   "packagePolicy": "latest from configured apt sources",
   "manualTools": {
     "opencode": {
+      "url": null,
+      "note": "Install from the official V2 command; credentials stay in local auth storage.",
       "observedVersion": "2.0.18",
       "updateCommand": "opencode upgrade",
       "managedByBootstrap": false
     }
-  }
+  },
+  "deferredTools": [
+    {
+      "id": "docker",
+      "label": "apt `docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin`"
+    }
+  ]
 }

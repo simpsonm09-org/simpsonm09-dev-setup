@@ -5,19 +5,32 @@
 //   node scripts/tools.mjs check    validate tools.yaml and that artifacts are current
 //   node scripts/tools.mjs plan     print this host's install plan, change nothing
 //
-// tools.yaml is the single hand-edited source of the tool data. The generator
-// reads a small, block-only YAML subset (mappings, sequences, scalars) so it runs
-// with plain node and no dependencies. See docs/apps.md.
+// tools.yaml is the single hand-edited source of the tool data. The YAML parser
+// lives in scripts/lib/yaml.mjs and the renderers in scripts/lib/render.mjs.
+// See docs/apps.md.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
+import { parseYaml } from './lib/yaml.mjs';
+import { installLabel, renderArtifacts, sectionPackages } from './lib/render.mjs';
+
+export { parseYaml, renderArtifacts };
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = resolve(HERE, '..');
 
 export const MANIFEST_FILE = 'tools.yaml';
+
+// Every generated artifact and its consumer:
+//   Brewfile                  apply-tools.sh runs `brew bundle` on macOS
+//   windows/apps.json         windows/Install-Apps.ps1 reads the winget/msstore list
+//   windows/manual-apps.json  windows/README.md and the manual-install audit
+//   wsl/packages.json         wsl/bootstrap.sh and wsl/install-docker-engine.sh
+//   tools.generated.json      apply-tools.ps1 and apply-tools.sh read the full plan
+//   docs/apps.md              humans read the rendered tables
 export const GENERATED_FILES = [
   'Brewfile',
   'windows/apps.json',
@@ -38,125 +51,6 @@ commands:
   check    validate ${MANIFEST_FILE} and fail on a stale artifact
   plan     print this host's install plan and change nothing
 `;
-
-// --- YAML subset ------------------------------------------------------------
-
-function stripComment(line) {
-  let inSingle = false;
-  let inDouble = false;
-  for (let index = 0; index < line.length; index += 1) {
-    const char = line[index];
-    if (char === "'" && !inDouble) inSingle = !inSingle;
-    else if (char === '"' && !inSingle) inDouble = !inDouble;
-    else if (char === '#' && !inSingle && !inDouble && (index === 0 || /\s/.test(line[index - 1]))) {
-      return line.slice(0, index);
-    }
-  }
-  return line;
-}
-
-function keyColon(text) {
-  let inSingle = false;
-  let inDouble = false;
-  for (let index = 0; index < text.length; index += 1) {
-    const char = text[index];
-    if (char === "'" && !inDouble) inSingle = !inSingle;
-    else if (char === '"' && !inSingle) inDouble = !inDouble;
-    else if (char === ':' && !inSingle && !inDouble) {
-      if (index === text.length - 1 || text[index + 1] === ' ') return index;
-    }
-  }
-  return -1;
-}
-
-function splitKey(text) {
-  const index = keyColon(text);
-  if (index === -1) throw new Error(`not a mapping entry: ${text}`);
-  return { key: text.slice(0, index).trim(), rest: text.slice(index + 1).trim() };
-}
-
-function parseScalar(text) {
-  const value = text.trim();
-  if (value === '' || value === 'null' || value === '~') return null;
-  if (value === 'true') return true;
-  if (value === 'false') return false;
-  if (value.startsWith('"')) return JSON.parse(value);
-  if (value.startsWith("'")) return value.slice(1, -1).replace(/''/g, "'");
-  if (/^-?\d+$/.test(value)) return Number(value);
-  if (/^-?\d+\.\d+$/.test(value)) return Number(value);
-  return value;
-}
-
-function parseMapping(lines, index, indent) {
-  const result = {};
-  let cursor = index;
-  while (cursor < lines.length) {
-    const line = lines[cursor];
-    if (line.indent !== indent) break;
-    if (line.text.startsWith('- ') || line.text === '-') break;
-    const { key, rest } = splitKey(line.text);
-    cursor += 1;
-    if (rest !== '') {
-      result[key] = parseScalar(rest);
-    } else if (cursor < lines.length && lines[cursor].indent > indent) {
-      [result[key], cursor] = parseNode(lines, cursor, lines[cursor].indent);
-    } else if (cursor < lines.length && lines[cursor].indent === indent && lines[cursor].text.startsWith('- ')) {
-      [result[key], cursor] = parseSequence(lines, cursor, indent);
-    } else {
-      result[key] = null;
-    }
-  }
-  return [result, cursor];
-}
-
-function parseSequence(lines, index, indent) {
-  const result = [];
-  let cursor = index;
-  while (cursor < lines.length) {
-    const line = lines[cursor];
-    if (line.indent !== indent) break;
-    if (!(line.text.startsWith('- ') || line.text === '-')) break;
-    const rest = line.text === '-' ? '' : line.text.slice(2).trim();
-    if (rest === '') {
-      cursor += 1;
-      if (cursor < lines.length && lines[cursor].indent > indent) {
-        let value;
-        [value, cursor] = parseNode(lines, cursor, lines[cursor].indent);
-        result.push(value);
-      } else {
-        result.push(null);
-      }
-    } else if (keyColon(rest) !== -1) {
-      lines[cursor] = { indent: indent + 2, text: rest };
-      let value;
-      [value, cursor] = parseMapping(lines, cursor, indent + 2);
-      result.push(value);
-    } else {
-      result.push(parseScalar(rest));
-      cursor += 1;
-    }
-  }
-  return [result, cursor];
-}
-
-function parseNode(lines, index, indent) {
-  if (index >= lines.length) return [null, index];
-  if (lines[index].text.startsWith('- ') || lines[index].text === '-') {
-    return parseSequence(lines, index, indent);
-  }
-  return parseMapping(lines, index, indent);
-}
-
-export function parseYaml(text) {
-  const lines = [];
-  for (const raw of text.replace(/^\uFEFF/, '').split(/\r?\n/)) {
-    const stripped = stripComment(raw);
-    if (stripped.trim() === '') continue;
-    lines.push({ indent: stripped.length - stripped.trimStart().length, text: stripped.trim() });
-  }
-  if (lines.length === 0) return null;
-  return parseNode(lines, 0, lines[0].indent)[0];
-}
 
 // --- Manifest ---------------------------------------------------------------
 
@@ -191,6 +85,14 @@ function sectionErrors(tool, platform, section, errors) {
       break;
     case 'manual':
       if (!has('url') && !has('note')) errors.push(`${where} (manual) needs a url or a note`);
+      break;
+    case 'snap':
+      if (!has('package') && !(Array.isArray(section.packages) && section.packages.length > 0)) {
+        errors.push(`${where} (snap) needs a package`);
+      }
+      if (section.classic !== undefined && typeof section.classic !== 'boolean') {
+        errors.push(`${where}.classic must be a boolean`);
+      }
       break;
     default:
       if (!has('package') && !(Array.isArray(section.packages) && section.packages.length > 0)) {
@@ -228,176 +130,13 @@ export function validateManifest(manifest) {
   return errors;
 }
 
-// --- Renderers --------------------------------------------------------------
-
-function toolWindowsSection(tool) {
-  return tool.windows ?? null;
-}
-
-function renderWindowsApps(manifest) {
-  const apps = [];
-  for (const tool of manifest.tools) {
-    const section = toolWindowsSection(tool);
-    if (!section || (section.manager !== 'winget' && section.manager !== 'msstore')) continue;
-    if (typeof section.id !== 'string' || section.id === '') continue;
-    const entry = {
-      name: section.name ?? tool.name,
-      id: section.id,
-      source: section.manager,
-      role: tool.role,
-      installByDefault: section.installByDefault ?? tool.installByDefault ?? true,
-    };
-    if (section.requiresExplicitOptIn ?? tool.requiresExplicitOptIn) entry.requiresExplicitOptIn = true;
-    entry.version = section.version ?? null;
-    entry.versionPolicy = section.policy ?? tool.policy ?? 'latest';
-    if (Array.isArray(section.installedAliases)) entry.installedAliases = section.installedAliases;
-    apps.push(entry);
-  }
-  return apps;
-}
-
-function renderWindowsManual(manifest) {
-  const apps = [];
-  for (const tool of manifest.tools) {
-    const section = toolWindowsSection(tool);
-    if (!section || section.manager !== 'manual' || tool.kind !== 'app') continue;
-    apps.push({
-      name: section.name ?? tool.name,
-      publisher: section.publisher ?? tool.name,
-      source: section.url,
-      role: tool.role,
-      observedVersion: section.observedVersion ?? null,
-      installPolicy: section.installPolicy ?? 'manual-official-release',
-    });
-  }
-  return apps;
-}
-
-function sectionPackages(section) {
-  if (Array.isArray(section.packages) && section.packages.length > 0) return section.packages;
-  return [section.package];
-}
-
-function renderWslPackages(manifest) {
-  const aptPackages = [];
-  const optionalAptProfiles = {};
-  const snapPackages = [];
-  const manualTools = {};
-  for (const tool of manifest.tools) {
-    const section = tool.wsl;
-    if (!section) continue;
-    if (section.manager === 'apt') {
-      if (section.profile) (optionalAptProfiles[section.profile] ??= []).push(...sectionPackages(section));
-      else aptPackages.push(...sectionPackages(section));
-    } else if (section.manager === 'snap') {
-      snapPackages.push(...sectionPackages(section));
-    } else if (section.manager === 'manual') {
-      manualTools[tool.id] = {
-        observedVersion: section.observedVersion ?? null,
-        updateCommand: section.updateCommand ?? null,
-        managedByBootstrap: section.managedByBootstrap ?? false,
-      };
-    }
-  }
-  const data = { ubuntuRelease: manifest.ubuntuRelease, aptPackages };
-  if (Object.keys(optionalAptProfiles).length > 0) data.optionalAptProfiles = optionalAptProfiles;
-  if (snapPackages.length > 0) data.snapPackages = snapPackages;
-  data.packagePolicy = manifest.packagePolicy;
-  data.manualTools = manualTools;
-  return data;
-}
-
-function renderBrewfile(manifest) {
-  const lines = ['# Generated from tools.yaml by scripts/tools.mjs. Do not edit by hand.'];
-  for (const tool of manifest.tools) {
-    const section = tool.macos;
-    if (!section || section.manager !== 'brew') continue;
-    if (section.formula) lines.push(`brew "${section.formula}"`);
-    else if (section.cask) lines.push(`cask "${section.cask}"`);
-  }
-  return `${lines.join('\n')}\n`;
-}
-
-function renderPlan(manifest) {
-  return `${JSON.stringify({ generatedBy: 'scripts/tools.mjs', ...manifest }, null, 2)}\n`;
-}
-
-function installLabel(section) {
-  const packages = Array.isArray(section.packages) ? section.packages.join(', ') : section.package;
-  switch (section.manager) {
-    case 'winget': return `winget \`${section.id}\``;
-    case 'msstore': return `msstore \`${section.id}\``;
-    case 'scoop': return `scoop \`${packages}\``;
-    case 'apt': return `apt \`${packages}\``;
-    case 'snap': return `snap \`${packages}\``;
-    case 'npm': return `npm \`${packages}\``;
-    case 'brew': return section.formula ? `brew \`${section.formula}\`` : `cask \`${section.cask}\``;
-    case 'manual': return section.url ? `manual (${section.url})` : 'manual';
-    default: return section.manager;
-  }
-}
-
-function platformInstall(tool) {
-  return PLATFORMS
-    .filter((platform) => tool[platform])
-    .map((platform) => `${platform}: ${installLabel(tool[platform])}`)
-    .join('; ');
-}
-
-function renderDocs(manifest) {
-  const rows = (kind, header) => {
-    const lines = [`| ${header} | Role | Install |`, '| --- | --- | --- |'];
-    for (const tool of manifest.tools) {
-      if (tool.kind !== kind) continue;
-      const role = tool.equivalents ? `${tool.role} (equivalents: ${tool.equivalents.join(', ')})` : tool.role;
-      lines.push(`| ${tool.name} | ${role} | ${platformInstall(tool)} |`);
-    }
-    return lines.join('\n');
-  };
-  return `# Apps and roles
-
-Generated from [\`../tools.yaml\`](../tools.yaml). Do not edit this file by hand; edit
-\`tools.yaml\` and run \`just tools-render\`. The Windows list also lands in
-[\`../windows/apps.json\`](../windows/apps.json) and
-[\`../windows/manual-apps.json\`](../windows/manual-apps.json), the WSL list in
-[\`../wsl/packages.json\`](../wsl/packages.json), and the macOS list in
-[\`../Brewfile\`](../Brewfile).
-
-## Apps
-
-${rows('app', 'App')}
-
-## Developer CLI tools
-
-${rows('cli', 'Tool')}
-
-## Installation-source policy
-
-Prefer package managers. winget is the first choice for Windows apps, apt and snap for
-WSL packages, and brew for macOS. Scoop is the approved Windows fallback when winget has
-no entry. Use an official publisher installer only when no supported package manager
-entry exists, and never an unofficial mirror. Microsoft Store apps need interactive
-review of their terms, so the apply scripts leave them for a manual install. Existing
-installations are detected and left unchanged; a version pin applies only to a new
-install.
-`;
-}
-
-export function renderArtifacts(manifest) {
-  return {
-    'Brewfile': renderBrewfile(manifest),
-    'windows/apps.json': `${JSON.stringify(renderWindowsApps(manifest), null, 2)}\n`,
-    'windows/manual-apps.json': `${JSON.stringify(renderWindowsManual(manifest), null, 2)}\n`,
-    'wsl/packages.json': `${JSON.stringify(renderWslPackages(manifest), null, 2)}\n`,
-    'tools.generated.json': renderPlan(manifest),
-    'docs/apps.md': renderDocs(manifest),
-  };
-}
-
 // --- Commands ---------------------------------------------------------------
 
+// Validate first, then compare artifacts. Bad input returns schema errors and
+// never reaches a renderer, so a null tool cannot throw a TypeError.
 export function checkArtifacts(root, manifest) {
   const errors = validateManifest(manifest);
+  if (errors.length > 0) return errors;
   const rendered = renderArtifacts(manifest);
   for (const [relative, expected] of Object.entries(rendered)) {
     const path = join(root, relative);
@@ -417,6 +156,29 @@ function hostPlatform() {
   if (process.platform === 'darwin') return 'macos';
   if (process.platform === 'linux') return 'wsl';
   return 'unknown';
+}
+
+export function planLines(manifest, platform) {
+  const lines = [`host platform: ${platform}`];
+  for (const tool of manifest.tools) {
+    const section = tool[platform];
+    if (!section) {
+      lines.push(`  skip     ${tool.id} (not claimed on ${platform})`);
+      continue;
+    }
+    const optIn = section.requiresExplicitOptIn ?? tool.requiresExplicitOptIn;
+    const byDefault = section.installByDefault ?? tool.installByDefault ?? true;
+    let action = 'install';
+    if (optIn) action = 'opt-in';
+    else if (!byDefault) action = 'skip';
+    else if (detect(section) === 'present') action = 'present';
+    lines.push(`  ${action.padEnd(8)} ${tool.id}\t${installLabel(section)}`);
+  }
+  return lines;
+}
+
+function printPlan(manifest, platform) {
+  process.stdout.write(`${planLines(manifest, platform).join('\n')}\n`);
 }
 
 function main() {
@@ -476,8 +238,9 @@ function detect(section) {
     return (result.stdout ?? '').includes(section.id) ? 'present' : 'missing';
   }
   if (section.manager === 'apt') {
-    const result = run('dpkg-query', ['-W', '-f=${Version}', section.package]);
-    return result.status === 0 ? 'present' : 'missing';
+    const present = sectionPackages(section)
+      .every((pkg) => run('dpkg-query', ['-W', '-f=${Version}', String(pkg)]).status === 0);
+    return present ? 'present' : 'missing';
   }
   if (section.manager === 'brew') {
     const result = run('brew', ['list', section.formula ?? section.cask]);
@@ -489,24 +252,6 @@ function detect(section) {
     return (result.stdout ?? '').includes(section.package) ? 'present' : 'missing';
   }
   return 'unknown';
-}
-
-function printPlan(manifest, platform) {
-  process.stdout.write(`host platform: ${platform}\n`);
-  for (const tool of manifest.tools) {
-    const section = tool[platform];
-    if (!section) {
-      process.stdout.write(`  skip     ${tool.id} (not claimed on ${platform})\n`);
-      continue;
-    }
-    const optIn = section.requiresExplicitOptIn ?? tool.requiresExplicitOptIn;
-    const byDefault = section.installByDefault ?? tool.installByDefault ?? true;
-    let action = 'install';
-    if (optIn) action = 'opt-in';
-    else if (!byDefault) action = 'skip';
-    else if (detect(section) === 'present') action = 'present';
-    process.stdout.write(`  ${action.padEnd(8)} ${tool.id}\t${installLabel(section)}\n`);
-  }
 }
 
 function fail(errors) {
