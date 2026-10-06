@@ -4,7 +4,9 @@
 .env.*
 !.env.example
 secrets.env
-.envrc.local
+.envrc
+.envrc.*
+!.envrc.example
 *.local.json
 *.local.yaml
 *.local.yml
