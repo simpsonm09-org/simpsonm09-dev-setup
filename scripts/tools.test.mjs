@@ -25,14 +25,24 @@ function materialize(root, manifest) {
   }
 }
 
-function planIds(lines) {
-  const actions = new Set(['present', 'install', 'manual', 'opt-in']);
-  const ids = new Set();
+const PLAN_ACTIONS = new Set(['present', 'install', 'manual', 'opt-in', 'deferred']);
+
+function planActions(lines) {
+  const actions = new Map();
   for (const line of lines) {
     const match = /^\s{2}(\S+)\s+(\S+)/.exec(line);
-    if (match && actions.has(match[1])) ids.add(match[2]);
+    if (match && PLAN_ACTIONS.has(match[1])) actions.set(match[2], match[1]);
   }
-  return ids;
+  return actions;
+}
+
+function runShPlanDarwin() {
+  const script = [
+    'uname() { echo Darwin; }',
+    'export -f uname',
+    'bash scripts/apply-tools.sh plan',
+  ].join('\n');
+  return spawnSync('bash', ['-c', script], { cwd: REPO_ROOT, encoding: 'utf8' });
 }
 
 function runCli(command) {
@@ -77,9 +87,11 @@ test('renderWslPackages covers every WSL manager tools.yaml declares', () => {
   assert.deepEqual(wsl.deferredTools.map((entry) => entry.id), ['docker']);
 });
 
-test('renderBrewfile carries the docker-desktop cask', () => {
+test('renderBrewfile comments out the opt-in docker-desktop cask', () => {
   const manifest = loadManifest(REPO_ROOT);
-  assert.match(renderArtifacts(manifest).Brewfile, /^cask "docker-desktop"$/m);
+  const brewfile = renderArtifacts(manifest).Brewfile;
+  assert.doesNotMatch(brewfile, /^cask "docker-desktop"$/m);
+  assert.match(brewfile, /^# opt-in: cask "docker-desktop"/m);
 });
 
 test('checkArtifacts reports schema errors without throwing', () => {
@@ -132,6 +144,15 @@ test('validation rejects a tool with no role', () => {
   assert.match(validateManifest(manifest).join('\n'), /x: role is required/);
 });
 
+test('check rejects a string equivalents without throwing', () => {
+  const manifest = {
+    tools: [{ id: 'x', name: 'X', role: 'r', kind: 'cli', equivalents: 'noctty', wsl: { manager: 'apt', package: 'x' } }],
+  };
+  const errors = checkArtifacts('/nonexistent-root', manifest);
+  assert.match(errors.join('\n'), /x: equivalents must be a list of strings/);
+  assert.ok(!errors.some((error) => error.includes('is missing')), `schema errors only: ${errors}`);
+});
+
 test('render and check exit 0 through the CLI', () => {
   for (const command of ['render', 'check']) {
     const result = runCli(command);
@@ -139,14 +160,25 @@ test('render and check exit 0 through the CLI', () => {
   }
 });
 
-test('the sh plan lists every tool the wsl platform declares', () => {
+test('the sh plan agrees with the node plan on the action for every tool', () => {
   const manifest = loadManifest(REPO_ROOT);
-  const result = spawnSync('bash', ['scripts/apply-tools.sh', 'plan'], { cwd: REPO_ROOT, encoding: 'utf8' });
-  if (result.error) return;
-  assert.equal(result.status, 0, result.stderr);
-  const expected = planIds(planLines(manifest, 'wsl'));
-  const actual = planIds(result.stdout.split(/\r?\n/));
-  assert.deepEqual([...actual].sort(), [...expected].sort());
+
+  // The macOS plan is comparable on any host: brew is absent on the CI runner
+  // and on Windows, so both sides resolve every brew tool to "install". This
+  // catches the docker opt-in and the manual action.
+  const macos = runShPlanDarwin();
+  if (macos.error) return;
+  assert.equal(macos.status, 0, macos.stderr);
+  assert.deepEqual(planActions(macos.stdout.split(/\r?\n/)), planActions(planLines(manifest, 'macos')));
+
+  // The WSL plan is comparable only when node runs on the WSL host itself.
+  // From Windows node, dpkg-query and snap are unreachable, so the presence
+  // check legitimately differs from the shell plan's.
+  if (process.platform !== 'linux') return;
+  const wsl = spawnSync('bash', ['scripts/apply-tools.sh', 'plan'], { cwd: REPO_ROOT, encoding: 'utf8' });
+  if (wsl.error) return;
+  assert.equal(wsl.status, 0, wsl.stderr);
+  assert.deepEqual(planActions(wsl.stdout.split(/\r?\n/)), planActions(planLines(manifest, 'wsl')));
 });
 
 test('the sh twin exits non-zero when an install fails', () => {

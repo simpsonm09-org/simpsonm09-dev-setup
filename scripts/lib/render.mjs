@@ -105,8 +105,14 @@ function renderBrewfile(manifest) {
   for (const tool of manifest.tools) {
     const section = tool.macos;
     if (!section || section.manager !== 'brew') continue;
-    if (section.formula) lines.push(`brew "${section.formula}"`);
-    else if (section.cask) lines.push(`cask "${section.cask}"`);
+    const entry = section.formula ? `brew "${section.formula}"` : `cask "${section.cask}"`;
+    // An opt-in or non-default tool stays commented out, so `brew bundle` never
+    // installs it. The note tells the reader how to install it deliberately.
+    if (isDeferred(tool, section)) {
+      lines.push(`# opt-in: ${entry}${tool.note ? ` ${tool.note}` : ''}`);
+      continue;
+    }
+    lines.push(entry);
   }
   return `${lines.join('\n')}\n`;
 }
@@ -143,7 +149,8 @@ function renderDocs(manifest) {
     const lines = [`| ${header} | Role | Install |`, '| --- | --- | --- |'];
     for (const tool of manifest.tools) {
       if (tool.kind !== kind) continue;
-      const role = tool.equivalents ? `${tool.role} (equivalents: ${tool.equivalents.join(', ')})` : tool.role;
+      const equivalents = Array.isArray(tool.equivalents) ? tool.equivalents.join(', ') : '';
+      const role = equivalents ? `${tool.role} (equivalents: ${equivalents})` : tool.role;
       lines.push(`| ${tool.name} | ${role} | ${platformInstall(tool)} |`);
     }
     return lines.join('\n');

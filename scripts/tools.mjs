@@ -123,6 +123,10 @@ export function validateManifest(manifest) {
     if (typeof tool.name !== 'string' || tool.name === '') errors.push(`${tool.id}: name is required`);
     if (typeof tool.role !== 'string' || tool.role === '') errors.push(`${tool.id}: role is required`);
     if (!KINDS.has(tool.kind)) errors.push(`${tool.id}: kind must be app or cli`);
+    if (tool.equivalents !== undefined
+      && (!Array.isArray(tool.equivalents) || tool.equivalents.some((entry) => typeof entry !== 'string'))) {
+      errors.push(`${tool.id}: equivalents must be a list of strings`);
+    }
     const platforms = PLATFORMS.filter((platform) => tool[platform] !== undefined);
     if (platforms.length === 0) errors.push(`${tool.id}: needs at least one platform section`);
     for (const platform of platforms) sectionErrors(tool, platform, tool[platform], errors);
@@ -168,10 +172,16 @@ export function planLines(manifest, platform) {
     }
     const optIn = section.requiresExplicitOptIn ?? tool.requiresExplicitOptIn;
     const byDefault = section.installByDefault ?? tool.installByDefault ?? true;
-    let action = 'install';
+    let action;
     if (optIn) action = 'opt-in';
-    else if (!byDefault) action = 'skip';
-    else if (detect(section) === 'present') action = 'present';
+    else if (!byDefault) action = 'deferred';
+    else {
+      // Match the verb the shell plans use for the same detect result.
+      const state = detect(section);
+      if (state === 'present') action = 'present';
+      else if (state === 'manual') action = 'manual';
+      else action = 'install';
+    }
     lines.push(`  ${action.padEnd(8)} ${tool.id}\t${installLabel(section)}`);
   }
   return lines;
@@ -231,8 +241,10 @@ function run(command, args) {
 
 // Best-effort presence check. A missing manager is "unknown", never fatal.
 function detect(section) {
-  if (section.manager === 'manual') return 'manual';
-  if (section.manager === 'winget' || section.manager === 'msstore') {
+  // A manual section and a Microsoft Store section are both installed by a
+  // human, so the plan calls both "manual" instead of probing the machine.
+  if (section.manager === 'manual' || section.manager === 'msstore') return 'manual';
+  if (section.manager === 'winget') {
     const result = run('winget', ['list', '--id', section.id, '--exact', '--source', section.manager, '--disable-interactivity']);
     if (result.status === null) return 'unknown';
     return (result.stdout ?? '').includes(section.id) ? 'present' : 'missing';

@@ -82,9 +82,17 @@ import json,sys
 plan = json.load(open(sys.argv[1]))
 manager = sys.argv[2]
 fields = sys.argv[3:]
+
+def is_deferred(tool):
+    section = tool.get("macos", {})
+    return bool(section.get("requiresExplicitOptIn", tool.get("requiresExplicitOptIn"))) or \
+        section.get("installByDefault", tool.get("installByDefault", True)) is False
+
 for tool in plan.get("tools", []):
     section = tool.get("macos")
     if not section or section.get("manager") != manager:
+        continue
+    if is_deferred(tool):
         continue
     values = {"id": tool.get("id", "")}
     values.update(section)
@@ -99,6 +107,9 @@ plan = json.load(open(sys.argv[1]))
 for tool in plan.get("tools", []):
     section = tool.get("macos")
     if not section or section.get("manager") != "manual":
+        continue
+    if section.get("requiresExplicitOptIn", tool.get("requiresExplicitOptIn")) or \
+            section.get("installByDefault", tool.get("installByDefault", True)) is False:
         continue
     detail = section.get("url") or section.get("note") or ""
     print("%s (%s)" % (tool["id"], detail) if detail else tool["id"])
@@ -159,7 +170,17 @@ for tool in plan.get("tools", []):
     if not section:
         continue
     manager = section.get("manager")
-    if manager == "brew":
+    opt_in = section.get("requiresExplicitOptIn", tool.get("requiresExplicitOptIn"))
+    by_default = section.get("installByDefault", tool.get("installByDefault", True))
+    if opt_in or by_default is False:
+        if manager == "brew":
+            label = "brew `%s`" % section["formula"] if section.get("formula") else "cask `%s`" % section["cask"]
+        elif manager == "npm":
+            label = "npm `%s`" % section["package"]
+        else:
+            label = section.get("url") or section.get("note") or ""
+        print("  opt-in   %s\t%s" % (tool["id"], label))
+    elif manager == "brew":
         label = "brew `%s`" % section["formula"] if section.get("formula") else "cask `%s`" % section["cask"]
         print("  install  %s\t%s" % (tool["id"], label))
     elif manager == "npm":

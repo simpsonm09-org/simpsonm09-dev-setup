@@ -5,7 +5,7 @@ cask "ghostty"
 cask "sublime-text"
 cask "zed"
 cask "postman"
-cask "docker-desktop"
+# opt-in: cask "docker-desktop" Both machines run Docker Engine inside Ubuntu WSL2; Docker Desktop is opt-in only.
 brew "gh"
 brew "kubectl"
 brew "helm"
