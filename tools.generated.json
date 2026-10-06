@@ -1,0 +1,458 @@
+{
+  "generatedBy": "scripts/tools.mjs",
+  "version": 1,
+  "ubuntuRelease": "26.04",
+  "packagePolicy": "latest from configured apt sources",
+  "tools": [
+    {
+      "id": "git",
+      "name": "Git",
+      "role": "Version control",
+      "kind": "cli",
+      "wsl": {
+        "manager": "apt",
+        "package": "git"
+      }
+    },
+    {
+      "id": "curl",
+      "name": "curl",
+      "role": "HTTP client",
+      "kind": "cli",
+      "wsl": {
+        "manager": "apt",
+        "package": "curl"
+      }
+    },
+    {
+      "id": "ca-certificates",
+      "name": "CA certificates",
+      "role": "TLS trust store",
+      "kind": "cli",
+      "wsl": {
+        "manager": "apt",
+        "package": "ca-certificates"
+      }
+    },
+    {
+      "id": "unzip",
+      "name": "unzip",
+      "role": "Archive extraction",
+      "kind": "cli",
+      "wsl": {
+        "manager": "apt",
+        "package": "unzip"
+      }
+    },
+    {
+      "id": "gnupg",
+      "name": "GnuPG",
+      "role": "Signature and key handling",
+      "kind": "cli",
+      "wsl": {
+        "manager": "apt",
+        "package": "gnupg"
+      }
+    },
+    {
+      "id": "chrome",
+      "name": "Google Chrome",
+      "role": "Default development browser",
+      "kind": "app",
+      "policy": "vendor-auto-update",
+      "note": "Keep Chrome's own security auto-updates; do not freeze a stale browser build.",
+      "windows": {
+        "manager": "winget",
+        "id": "Google.Chrome"
+      },
+      "macos": {
+        "manager": "brew",
+        "cask": "google-chrome"
+      }
+    },
+    {
+      "id": "github-desktop",
+      "name": "GitHub Desktop",
+      "role": "Routine Git pull/push UI",
+      "kind": "app",
+      "policy": "latest",
+      "windows": {
+        "manager": "winget",
+        "id": "GitHub.GitHubDesktop"
+      },
+      "macos": {
+        "manager": "brew",
+        "cask": "github"
+      }
+    },
+    {
+      "id": "terminal",
+      "name": "Terminal",
+      "role": "GPU-accelerated terminal",
+      "kind": "app",
+      "equivalents": [
+        "noctty",
+        "ghostty"
+      ],
+      "policy": "latest",
+      "note": "Ghostty has no Windows build; Noctty is the Windows stand-in.",
+      "windows": {
+        "manager": "winget",
+        "id": "AmanThanvi.winghostty",
+        "name": "Noctty",
+        "installedAliases": [
+          "Noctty"
+        ]
+      },
+      "wsl": {
+        "manager": "snap",
+        "package": "ghostty",
+        "classic": true
+      },
+      "macos": {
+        "manager": "brew",
+        "cask": "ghostty"
+      }
+    },
+    {
+      "id": "sublime-text",
+      "name": "Sublime Text 4",
+      "role": "Text editing",
+      "kind": "app",
+      "policy": "latest",
+      "windows": {
+        "manager": "winget",
+        "id": "SublimeHQ.SublimeText.4"
+      },
+      "macos": {
+        "manager": "brew",
+        "cask": "sublime-text"
+      }
+    },
+    {
+      "id": "zed",
+      "name": "Zed",
+      "role": "IDE",
+      "kind": "app",
+      "policy": "latest",
+      "windows": {
+        "manager": "winget",
+        "id": "ZedIndustries.Zed"
+      },
+      "macos": {
+        "manager": "brew",
+        "cask": "zed"
+      }
+    },
+    {
+      "id": "postman",
+      "name": "Postman",
+      "role": "API testing",
+      "kind": "app",
+      "policy": "latest",
+      "windows": {
+        "manager": "winget",
+        "id": "Postman.Postman"
+      },
+      "macos": {
+        "manager": "brew",
+        "cask": "postman"
+      }
+    },
+    {
+      "id": "docker",
+      "name": "Docker Desktop",
+      "role": "Linux containers through WSL2",
+      "kind": "app",
+      "policy": "latest",
+      "note": "Both machines run Docker Engine inside Ubuntu WSL2; Docker Desktop is opt-in only.",
+      "installByDefault": false,
+      "requiresExplicitOptIn": true,
+      "windows": {
+        "manager": "winget",
+        "id": "Docker.DockerDesktop"
+      },
+      "wsl": {
+        "manager": "apt",
+        "profile": "dockerEngine",
+        "packages": [
+          "docker-ce",
+          "docker-ce-cli",
+          "containerd.io",
+          "docker-buildx-plugin",
+          "docker-compose-plugin"
+        ]
+      },
+      "macos": {
+        "manager": "brew",
+        "cask": "docker-desktop"
+      }
+    },
+    {
+      "id": "onenote",
+      "name": "OneNote",
+      "role": "Notes; current OneNote app",
+      "kind": "app",
+      "policy": "store-managed",
+      "windows": {
+        "manager": "msstore",
+        "id": "XPFFZHVGQWWLHB"
+      }
+    },
+    {
+      "id": "openchamber",
+      "name": "OpenChamber",
+      "role": "OpenCode GUI",
+      "kind": "app",
+      "note": "No matching winget package; install and update from the official release.",
+      "windows": {
+        "manager": "manual",
+        "publisher": "OpenChamber",
+        "url": "https://github.com/openchamber/openchamber/releases",
+        "observedVersion": "2.0.2",
+        "installPolicy": "manual-official-release"
+      }
+    },
+    {
+      "id": "gh",
+      "name": "GitHub CLI",
+      "role": "CLI-only GitHub tasks",
+      "kind": "cli",
+      "policy": "latest",
+      "windows": {
+        "manager": "winget",
+        "id": "GitHub.cli",
+        "fallback": [
+          {
+            "manager": "scoop",
+            "package": "gh"
+          }
+        ]
+      },
+      "wsl": {
+        "manager": "apt",
+        "package": "gh"
+      },
+      "macos": {
+        "manager": "brew",
+        "formula": "gh"
+      }
+    },
+    {
+      "id": "kubectl",
+      "name": "Kubernetes CLI",
+      "role": "Kubernetes objects",
+      "kind": "cli",
+      "policy": "latest",
+      "windows": {
+        "manager": "winget",
+        "id": "Kubernetes.kubectl"
+      },
+      "macos": {
+        "manager": "brew",
+        "formula": "kubectl"
+      }
+    },
+    {
+      "id": "helm",
+      "name": "Helm",
+      "role": "Kubernetes packaging",
+      "kind": "cli",
+      "policy": "latest",
+      "windows": {
+        "manager": "winget",
+        "id": "Helm.Helm"
+      },
+      "macos": {
+        "manager": "brew",
+        "formula": "helm"
+      }
+    },
+    {
+      "id": "vault",
+      "name": "HashiCorp Vault",
+      "role": "Vault secrets",
+      "kind": "cli",
+      "policy": "latest",
+      "windows": {
+        "manager": "winget",
+        "id": "Hashicorp.Vault"
+      },
+      "macos": {
+        "manager": "brew",
+        "formula": "vault"
+      }
+    },
+    {
+      "id": "kustomize",
+      "name": "Kustomize",
+      "role": "Kubernetes manifest rendering",
+      "kind": "cli",
+      "policy": "latest",
+      "windows": {
+        "manager": "winget",
+        "id": "Kubernetes.kustomize"
+      },
+      "macos": {
+        "manager": "brew",
+        "formula": "kustomize"
+      }
+    },
+    {
+      "id": "postman-cli",
+      "name": "Postman CLI",
+      "role": "Postman cloud",
+      "kind": "cli",
+      "policy": "latest",
+      "windows": {
+        "manager": "npm",
+        "package": "postman-cli"
+      },
+      "wsl": {
+        "manager": "npm",
+        "package": "postman-cli"
+      },
+      "macos": {
+        "manager": "npm",
+        "package": "postman-cli"
+      }
+    },
+    {
+      "id": "newman",
+      "name": "Newman",
+      "role": "Postman collection runs",
+      "kind": "cli",
+      "policy": "latest",
+      "windows": {
+        "manager": "npm",
+        "package": "newman"
+      },
+      "wsl": {
+        "manager": "npm",
+        "package": "newman"
+      },
+      "macos": {
+        "manager": "npm",
+        "package": "newman"
+      }
+    },
+    {
+      "id": "acli",
+      "name": "Atlassian CLI",
+      "role": "Jira and Atlassian",
+      "kind": "cli",
+      "policy": "latest",
+      "windows": {
+        "manager": "manual",
+        "url": "https://developer.atlassian.com/cloud/acli/"
+      },
+      "macos": {
+        "manager": "manual",
+        "url": "https://developer.atlassian.com/cloud/acli/"
+      }
+    },
+    {
+      "id": "jenkins-cli",
+      "name": "Jenkins CLI",
+      "role": "Jenkins jobs and builds",
+      "kind": "cli",
+      "policy": "latest",
+      "note": "Download the controller jar from <url>/jnlpJars/jenkins-cli.jar.",
+      "windows": {
+        "manager": "manual",
+        "url": "https://www.jenkins.io/doc/book/managing/cli/"
+      },
+      "macos": {
+        "manager": "manual",
+        "url": "https://www.jenkins.io/doc/book/managing/cli/"
+      }
+    },
+    {
+      "id": "just",
+      "name": "just",
+      "role": "Repository tasks",
+      "kind": "cli",
+      "policy": "latest",
+      "note": "Pinned in mise.toml; run mise install in the repository.",
+      "windows": {
+        "manager": "manual",
+        "note": "Pinned in mise.toml; run mise install in the repository."
+      },
+      "macos": {
+        "manager": "manual",
+        "note": "Pinned in mise.toml; run mise install in the repository."
+      }
+    },
+    {
+      "id": "himalaya",
+      "name": "Himalaya",
+      "role": "Send from the Gmail mailbox",
+      "kind": "cli",
+      "policy": "latest",
+      "windows": {
+        "manager": "scoop",
+        "package": "himalaya",
+        "fallback": [
+          {
+            "manager": "manual",
+            "url": "https://github.com/soywod/himalaya/releases"
+          }
+        ]
+      },
+      "macos": {
+        "manager": "brew",
+        "formula": "himalaya"
+      }
+    },
+    {
+      "id": "ntfy",
+      "name": "ntfy",
+      "role": "Phone notifications",
+      "kind": "cli",
+      "policy": "latest",
+      "windows": {
+        "manager": "scoop",
+        "package": "ntfy",
+        "fallback": [
+          {
+            "manager": "manual",
+            "url": "https://github.com/binwiederhier/ntfy/releases"
+          }
+        ]
+      },
+      "macos": {
+        "manager": "brew",
+        "formula": "ntfy"
+      }
+    },
+    {
+      "id": "smsgate",
+      "name": "SMS Gateway",
+      "role": "Texting via an Android phone",
+      "kind": "cli",
+      "policy": "latest",
+      "windows": {
+        "manager": "manual",
+        "url": "https://github.com/capcom6/android-sms-gateway/releases"
+      },
+      "macos": {
+        "manager": "manual",
+        "url": "https://github.com/capcom6/android-sms-gateway/releases"
+      }
+    },
+    {
+      "id": "opencode",
+      "name": "OpenCode CLI",
+      "role": "AI CLI",
+      "kind": "cli",
+      "policy": "latest",
+      "note": "Installed separately from the package bootstrap; credentials stay in local auth storage.",
+      "wsl": {
+        "manager": "manual",
+        "note": "Install from the official V2 command; credentials stay in local auth storage.",
+        "observedVersion": "2.0.18",
+        "updateCommand": "opencode upgrade"
+      }
+    }
+  ]
+}

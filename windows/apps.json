@@ -21,11 +21,13 @@
     "name": "Noctty",
     "id": "AmanThanvi.winghostty",
     "source": "winget",
-    "role": "Terminal",
+    "role": "GPU-accelerated terminal",
     "installByDefault": true,
     "version": null,
     "versionPolicy": "latest",
-    "installedAliases": ["Noctty"]
+    "installedAliases": [
+      "Noctty"
+    ]
   },
   {
     "name": "Sublime Text 4",
@@ -74,10 +76,19 @@
     "versionPolicy": "store-managed"
   },
   {
+    "name": "GitHub CLI",
+    "id": "GitHub.cli",
+    "source": "winget",
+    "role": "CLI-only GitHub tasks",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
     "name": "Kubernetes CLI",
     "id": "Kubernetes.kubectl",
     "source": "winget",
-    "role": "Developer CLI: Kubernetes objects",
+    "role": "Kubernetes objects",
     "installByDefault": true,
     "version": null,
     "versionPolicy": "latest"
@@ -86,7 +97,7 @@
     "name": "Helm",
     "id": "Helm.Helm",
     "source": "winget",
-    "role": "Developer CLI: Kubernetes packaging",
+    "role": "Kubernetes packaging",
     "installByDefault": true,
     "version": null,
     "versionPolicy": "latest"
@@ -95,7 +106,16 @@
     "name": "HashiCorp Vault",
     "id": "Hashicorp.Vault",
     "source": "winget",
-    "role": "Developer CLI: Vault secrets",
+    "role": "Vault secrets",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
+    "name": "Kustomize",
+    "id": "Kubernetes.kustomize",
+    "source": "winget",
+    "role": "Kubernetes manifest rendering",
     "installByDefault": true,
     "version": null,
     "versionPolicy": "latest"

@@ -1,0 +1,15 @@
+# Generated from tools.yaml by scripts/tools.mjs. Do not edit by hand.
+cask "google-chrome"
+cask "github"
+cask "ghostty"
+cask "sublime-text"
+cask "zed"
+cask "postman"
+# opt-in: cask "docker-desktop" Both machines run Docker Engine inside Ubuntu WSL2; Docker Desktop is opt-in only.
+brew "gh"
+brew "kubectl"
+brew "helm"
+brew "vault"
+brew "kustomize"
+brew "himalaya"
+brew "ntfy"

@@ -13,6 +13,7 @@ Repeatable workstation setup for the Windows machines and Ubuntu on WSL2.
 ## Commands
 
 - `just install`, `just workspace`, `just lint`, `just aislop`, `just verify`.
+- `just tools`, `just tools-render`, `just tools-check`, `just tools-apply` drive the machine tool set from `tools.yaml`.
 
 ## Repo facts
 

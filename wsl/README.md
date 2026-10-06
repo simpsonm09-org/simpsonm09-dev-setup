@@ -12,7 +12,7 @@ To install the listed CLI prerequisites, explicitly run:
 bash wsl/bootstrap.sh --install
 ```
 
-The WSL package names are in [`packages.json`](packages.json). By default, the script installs current versions from Ubuntu's configured apt sources and the official GitHub CLI apt repository; package versions are not pinned. The current WSL setup has Git, curl, CA certificates, unzip, and GitHub CLI installed. It does **not** install a Docker daemon, add Docker groups, configure Git identity, or run `gh auth login`.
+The WSL package names are in [`packages.json`](packages.json), which is generated from [`tools.yaml`](../tools.yaml); edit that file and run `just tools-render`, do not hand-edit `packages.json`. By default, the script installs current versions from Ubuntu's configured apt sources and the official GitHub CLI apt repository; package versions are not pinned. The current WSL setup has Git, curl, CA certificates, unzip, and GitHub CLI installed. It does **not** install a Docker daemon, add Docker groups, configure Git identity, or run `gh auth login`.
 
 ## Docker Engine in WSL (Windows 10 laptop)
 
