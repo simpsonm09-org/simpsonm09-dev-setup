@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# platforms: linux
 # Delete OpenCode CLI sessions older than N days in the WSL store.
 # OpenChamber auto-cleanup covers the Windows store; this covers the WSL store,
 # which is a separate database. Audit by default; pass --apply to delete.

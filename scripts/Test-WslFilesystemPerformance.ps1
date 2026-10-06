@@ -1,3 +1,4 @@
+# platforms: windows
 [CmdletBinding()]
 param(
     [string] $DrvfsRoot = '/mnt/d/dev/simpsonm09',

@@ -1,3 +1,4 @@
+# platforms: windows
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
 param(
     [string] $Source = (Join-Path (Split-Path -Parent $PSScriptRoot) 'settings\windows\noctty\config.ghostty'),

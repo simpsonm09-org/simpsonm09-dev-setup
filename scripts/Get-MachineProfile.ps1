@@ -1,3 +1,4 @@
+# platforms: windows
 [CmdletBinding()]
 param(
     [string] $Override = $env:SIMPSONM09_MACHINE_PROFILE,

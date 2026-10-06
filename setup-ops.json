@@ -1,0 +1,101 @@
+{
+  "operations": [
+    {
+      "id": "apply-settings",
+      "platforms": ["windows"],
+      "windows": "windows/Apply-Settings.ps1",
+      "description": "Preview or apply the shared Zed settings snapshot (pass -Apply to write)."
+    },
+    {
+      "id": "install-apps",
+      "platforms": ["windows"],
+      "windows": "windows/Install-Apps.ps1",
+      "description": "Audit or install the winget app set (pass -Install to install)."
+    },
+    {
+      "id": "apply-noctty",
+      "platforms": ["windows"],
+      "windows": "scripts/Apply-NocttySettings.ps1",
+      "description": "Preview or apply the shared Noctty (Ghostty) config (pass -Apply to write)."
+    },
+    {
+      "id": "apply-openchamber",
+      "platforms": ["windows"],
+      "windows": "scripts/Apply-OpenChamberSettings.ps1",
+      "description": "Preview or apply OpenChamber app settings through its local API (pass -Apply to write)."
+    },
+    {
+      "id": "add-defender-exclusions",
+      "platforms": ["windows"],
+      "windows": "scripts/Add-DefenderExclusions.ps1",
+      "description": "Preview or add Defender exclusions for the workspace and WSL dir (pass -Apply from an elevated shell)."
+    },
+    {
+      "id": "machine-profile",
+      "platforms": ["windows"],
+      "windows": "scripts/Get-MachineProfile.ps1",
+      "description": "Report this machine's storage profile."
+    },
+    {
+      "id": "test-wsl-perf",
+      "platforms": ["windows"],
+      "windows": "scripts/Test-WslFilesystemPerformance.ps1",
+      "description": "Benchmark small- and large-file I/O on the Windows mount against ext4."
+    },
+    {
+      "id": "import-secrets",
+      "platforms": ["windows"],
+      "windows": "scripts/Import-Secrets.ps1",
+      "description": "Preview or import integration secrets as Windows user environment variables (pass -Apply to write)."
+    },
+    {
+      "id": "configure-git-identity",
+      "platforms": ["posix"],
+      "posix": "scripts/configure-git-identity.sh",
+      "description": "Set the local Git identity in each sibling repository."
+    },
+    {
+      "id": "publish-repos",
+      "platforms": ["posix"],
+      "posix": "scripts/publish-repos.sh",
+      "description": "Preview or publish the private GitHub repositories (pass --publish)."
+    },
+    {
+      "id": "bootstrap",
+      "platforms": ["linux"],
+      "posix": "wsl/bootstrap.sh",
+      "description": "Audit or install the WSL base packages (pass --install)."
+    },
+    {
+      "id": "install-docker-engine",
+      "platforms": ["linux"],
+      "posix": "wsl/install-docker-engine.sh",
+      "description": "Audit or install Docker Engine inside WSL (pass --install)."
+    },
+    {
+      "id": "install-bun",
+      "platforms": ["linux"],
+      "posix": "wsl/install-bun.sh",
+      "description": "Install Bun in WSL under ~/.bun."
+    },
+    {
+      "id": "load-secrets",
+      "platforms": ["linux"],
+      "posix": "wsl/load-secrets.sh",
+      "description": "Load WSL secrets from Infisical into the shell."
+    },
+    {
+      "id": "cleanup-sessions",
+      "platforms": ["linux"],
+      "posix": "wsl/cleanup-opencode-sessions.sh",
+      "description": "Audit or delete old OpenCode sessions in the WSL store (pass --apply)."
+    },
+    {
+      "id": "snapshot",
+      "platforms": ["windows", "linux"],
+      "windows": "scripts/Get-WorkspaceEnvironmentSnapshot.ps1",
+      "posix": "scripts/get-workspace-environment-snapshot.sh",
+      "description": "Collect this host's workspace environment snapshot (pass -Write or --write to write)."
+    }
+  ]
+}

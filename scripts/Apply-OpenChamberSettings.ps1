@@ -1,3 +1,4 @@
+# platforms: windows
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
 param(
     [string] $Desired = (Join-Path (Split-Path -Parent $PSScriptRoot) 'settings\windows\openchamber\settings.desired.json'),

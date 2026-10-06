@@ -30,7 +30,7 @@ aislop:
 # Check the workspace wiring without cloning anything.
 test:
     node scripts/workspace.mjs
-    node --test scripts/tools.test.mjs scripts/lib/yaml.test.mjs
+    node --test scripts/tools.test.mjs scripts/setup-ops.test.mjs scripts/lib/yaml.test.mjs
 
 # Print this host's tool install plan and change nothing.
 tools:
@@ -47,6 +47,70 @@ tools-check:
 # Install the machine tools. Windows drives winget then WSL; macOS uses brew.
 tools-apply:
     {{ if os_family() == "windows" { "pwsh -File scripts/apply-tools.ps1 apply" } else { "bash scripts/apply-tools.sh apply" } }}
+
+# Preview or apply the shared Zed settings snapshot (pass -Apply to write).
+apply-settings *args:
+    node scripts/setup-ops.mjs apply-settings {{args}}
+
+# Audit or install the winget app set (pass -Install to install).
+install-apps *args:
+    node scripts/setup-ops.mjs install-apps {{args}}
+
+# Preview or apply the shared Noctty (Ghostty) config (pass -Apply to write).
+apply-noctty *args:
+    node scripts/setup-ops.mjs apply-noctty {{args}}
+
+# Preview or apply OpenChamber app settings through its local API (pass -Apply to write).
+apply-openchamber *args:
+    node scripts/setup-ops.mjs apply-openchamber {{args}}
+
+# Preview or add Defender exclusions for the workspace and WSL dir (pass -Apply from an elevated shell).
+add-defender-exclusions *args:
+    node scripts/setup-ops.mjs add-defender-exclusions {{args}}
+
+# Report this machine's storage profile.
+machine-profile *args:
+    node scripts/setup-ops.mjs machine-profile {{args}}
+
+# Benchmark small- and large-file I/O on the Windows mount against ext4.
+test-wsl-perf *args:
+    node scripts/setup-ops.mjs test-wsl-perf {{args}}
+
+# Preview or import integration secrets as Windows user environment variables (pass -Apply to write).
+import-secrets *args:
+    node scripts/setup-ops.mjs import-secrets {{args}}
+
+# Set the local Git identity in each sibling repository.
+configure-git-identity *args:
+    node scripts/setup-ops.mjs configure-git-identity {{args}}
+
+# Preview or publish the private GitHub repositories (pass --publish).
+publish-repos *args:
+    node scripts/setup-ops.mjs publish-repos {{args}}
+
+# Audit or install the WSL base packages (pass --install).
+bootstrap *args:
+    node scripts/setup-ops.mjs bootstrap {{args}}
+
+# Audit or install Docker Engine inside WSL (pass --install).
+install-docker-engine *args:
+    node scripts/setup-ops.mjs install-docker-engine {{args}}
+
+# Install Bun in WSL under ~/.bun.
+install-bun *args:
+    node scripts/setup-ops.mjs install-bun {{args}}
+
+# Load WSL secrets from Infisical into the shell.
+load-secrets *args:
+    node scripts/setup-ops.mjs load-secrets {{args}}
+
+# Audit or delete old OpenCode sessions in the WSL store (pass --apply).
+cleanup-sessions *args:
+    node scripts/setup-ops.mjs cleanup-sessions {{args}}
+
+# Collect this host's workspace environment snapshot (pass -Write or --write to write).
+snapshot *args:
+    node scripts/setup-ops.mjs snapshot {{args}}
 
 # Lint and run the AI-slop gate.
 verify: lint aislop
