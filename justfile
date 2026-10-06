@@ -30,6 +30,23 @@ aislop:
 # Check the workspace wiring without cloning anything.
 test:
     node scripts/workspace.mjs
+    node --test scripts/tools.test.mjs
+
+# Print this host's tool install plan and change nothing.
+tools:
+    node scripts/tools.mjs plan
+
+# Regenerate the per-platform artifacts from tools.yaml.
+tools-render:
+    node scripts/tools.mjs render
+
+# Validate tools.yaml and fail when a generated artifact is stale.
+tools-check:
+    node scripts/tools.mjs check
+
+# Install the machine tools. Windows drives winget then WSL; macOS uses brew.
+tools-apply:
+    {{ if os_family() == "windows" { "pwsh -File scripts/apply-tools.ps1 apply" } else { "bash scripts/apply-tools.sh apply" } }}
 
 # Lint and run the AI-slop gate.
 verify: lint aislop

@@ -1,6 +1,6 @@
 # Windows host setup
 
-Prefer winget for Windows installs. The script uses exact package IDs from `apps.json`, and is intentionally audit-only by default. Run from PowerShell on each device:
+Prefer winget for Windows installs. The script uses exact package IDs from `apps.json`, and is intentionally audit-only by default. `apps.json` is generated from [`tools.yaml`](../tools.yaml); edit that file and run `just tools-render`, do not hand-edit `apps.json`. Run from PowerShell on each device:
 
 ```powershell
 Set-Location D:\dev\simpsonm09\projects\repos\simpsonm09-dev-setup
@@ -63,7 +63,7 @@ New Postman installs use the current winget version. The current laptop is on 12
 
 ## Apps without a verified winget package
 
-OpenChamber is installed from its official release page and is present on the current laptop. The configured winget source returned no package for it; its official source and observed laptop version are listed in [`manual-apps.json`](manual-apps.json). Re-run `winget search` on the Windows 11 desktop before using the fallback; if an official package becomes available there, add/use its exact winget ID. Otherwise use the upstream release and do not substitute an unofficial package.
+OpenChamber is installed from its official release page and is present on the current laptop. The configured winget source returned no package for it; its official source and observed laptop version are listed in [`manual-apps.json`](manual-apps.json), which is generated from [`tools.yaml`](../tools.yaml). Re-run `winget search` on the Windows 11 desktop before using the fallback; if an official package becomes available there, add/use its exact winget ID. Otherwise use the upstream release and do not substitute an unofficial package.
 
 The current laptop has both the current OneNote Store app (`XPFFZHVGQWWLHB`) and legacy **OneNote for Windows 10**. Let OneNote handle account-based notebook sync; this bootstrap must not export, copy, or delete notebooks.
 

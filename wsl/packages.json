@@ -17,6 +17,9 @@
       "docker-compose-plugin"
     ]
   },
+  "snapPackages": [
+    "ghostty"
+  ],
   "packagePolicy": "latest from configured apt sources",
   "manualTools": {
     "opencode": {

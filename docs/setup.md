@@ -3,7 +3,7 @@
 PowerShell commands in these docs run on Windows with `pwsh` (PowerShell 7). From WSL, invoke them as `pwsh.exe -File 'D:\...'`. They resolve Windows paths and talk to the Windows OpenChamber API, so a Linux `pwsh` does not work, and Windows PowerShell 5.1 (`powershell.exe`) does not populate `$PSScriptRoot` for scripts that use it in parameter defaults.
 
 1. Review the README and the per-platform instructions.
-2. On each Windows device, run `windows/Install-Apps.ps1` in audit mode first. It verifies `D:` and inventories supported winget packages; it does not install anything unless `-Install` is supplied.
+2. On each Windows device, run `windows/Install-Apps.ps1` in audit mode first. It verifies `D:` and inventories supported winget packages; it does not install anything unless `-Install` is supplied. The app data lives in [`tools.yaml`](../tools.yaml): `just tools` prints the plan, `just tools-apply` installs the Windows set and then reaches into WSL, and `just tools-check` fails when a generated artifact is stale.
 3. Run the WSL bootstrap in audit mode: `bash wsl/bootstrap.sh`. To install its listed packages, explicitly use `bash wsl/bootstrap.sh --install`; `sudo` may prompt.
 4. Docker Engine is installed from Docker's official apt repository. On a machine with constrained `C:` space, move the Ubuntu VHDX to `D:` before installing Engine. Verify `hello-world`, Compose, and a `D:` bind mount. Where the VHDX lives is per machine; see the machine profiles.
 5. After installing Zed, run `windows/Apply-Settings.ps1` to preview the portable global Zed baseline; use `-Apply` to back up and apply it.
