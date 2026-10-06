@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# platforms: posix
+# platforms: linux
 # Load secrets into the current shell (run with: . wsl/load-secrets.sh).
 # Sources the bootstrap .env, then pulls the real values from Infisical using
 # the Universal Auth machine identity. Falls back to the .env values when

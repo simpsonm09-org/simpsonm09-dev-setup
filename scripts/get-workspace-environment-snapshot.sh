@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# platforms: posix
+# platforms: linux
 # Collect the WSL-side machine state that affects work in the workspace.
 # Reads a fixed allowlist; never reads auth, sessions, or secrets.
 set -euo pipefail
