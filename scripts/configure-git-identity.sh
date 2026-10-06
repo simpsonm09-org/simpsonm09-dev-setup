@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# platforms: posix
 set -euo pipefail
 
 # The repository clones are siblings under projects/repos; reach them from this

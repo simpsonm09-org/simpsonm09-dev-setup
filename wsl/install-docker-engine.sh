@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# platforms: posix
 set -euo pipefail
 
 MODE="audit"

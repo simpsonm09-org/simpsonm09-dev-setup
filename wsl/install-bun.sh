@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# platforms: posix
 # Install Bun in WSL for the PStack skill scripts (poteto-mode orch and watch-pr).
 # Bun installs under ~/.bun on ext4, which keeps it off the slow /mnt mounts.
 set -euo pipefail
