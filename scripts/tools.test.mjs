@@ -26,14 +26,30 @@ function materialize(root, manifest) {
 }
 
 const PLAN_ACTIONS = new Set(['present', 'install', 'manual', 'opt-in', 'deferred']);
+const MANAGER_WORDS = ['winget', 'msstore', 'scoop', 'brew', 'cask', 'apt', 'snap', 'npm', 'manual'];
 
-function planActions(lines) {
-  const actions = new Map();
+// The agreement contract is the action set: the tool id, the manager, and the
+// action (install, opt-in, manual, or deferred). Presence is host-local. The
+// Node plan runs on the host and the shell plan runs on the target, which for
+// WSL are different machines, so `present` and `install` are compared as one
+// action. A tool whose action or manager differs still fails the comparison.
+function planActionSet(lines, manifest, platform) {
+  const managerById = new Map(
+    manifest.tools.filter((tool) => tool[platform]).map((tool) => [tool.id, tool[platform].manager]),
+  );
+  const actionSet = new Map();
   for (const line of lines) {
-    const match = /^\s{2}(\S+)\s+(\S+)/.exec(line);
-    if (match && PLAN_ACTIONS.has(match[1])) actions.set(match[2], match[1]);
+    const match = /^\s{2}(\S+)\s+(\S+)\s*(.*)$/.exec(line);
+    if (!match || !PLAN_ACTIONS.has(match[1])) continue;
+    const id = match[2];
+    const action = match[1] === 'present' ? 'install' : match[1];
+    // The shell plan does not name a manager on every line, so fall back to the
+    // manager tools.yaml declares when the line does not spell one out.
+    const manager = MANAGER_WORDS.find((word) => new RegExp(`\\b${word}\\b`).test(match[3]))
+      ?? managerById.get(id);
+    actionSet.set(id, { manager, action });
   }
-  return actions;
+  return actionSet;
 }
 
 function runShPlanDarwin() {
@@ -160,16 +176,19 @@ test('render and check exit 0 through the CLI', () => {
   }
 });
 
-test('the sh plan agrees with the node plan on the action for every tool', () => {
+test('the sh plan agrees with the node plan on the action set for every tool', () => {
   const manifest = loadManifest(REPO_ROOT);
 
   // The macOS plan is comparable on any host: brew is absent on the CI runner
   // and on Windows, so both sides resolve every brew tool to "install". This
-  // catches the docker opt-in and the manual action.
+  // catches the docker opt-in, the manual action, and a manager mismatch.
   const macos = runShPlanDarwin();
   if (macos.error) return;
   assert.equal(macos.status, 0, macos.stderr);
-  assert.deepEqual(planActions(macos.stdout.split(/\r?\n/)), planActions(planLines(manifest, 'macos')));
+  assert.deepEqual(
+    planActionSet(macos.stdout.split(/\r?\n/), manifest, 'macos'),
+    planActionSet(planLines(manifest, 'macos'), manifest, 'macos'),
+  );
 
   // The WSL plan is comparable only when node runs on the WSL host itself.
   // From Windows node, dpkg-query and snap are unreachable, so the presence
@@ -178,7 +197,10 @@ test('the sh plan agrees with the node plan on the action for every tool', () =>
   const wsl = spawnSync('bash', ['scripts/apply-tools.sh', 'plan'], { cwd: REPO_ROOT, encoding: 'utf8' });
   if (wsl.error) return;
   assert.equal(wsl.status, 0, wsl.stderr);
-  assert.deepEqual(planActions(wsl.stdout.split(/\r?\n/)), planActions(planLines(manifest, 'wsl')));
+  assert.deepEqual(
+    planActionSet(wsl.stdout.split(/\r?\n/), manifest, 'wsl'),
+    planActionSet(planLines(manifest, 'wsl'), manifest, 'wsl'),
+  );
 });
 
 test('the sh twin exits non-zero when an install fails', () => {

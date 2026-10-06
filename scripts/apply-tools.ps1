@@ -171,8 +171,9 @@ function Invoke-Tool($Tool, $Section, [bool] $Execute) {
         }
         'msstore' {
             # No command runs: the store install is interactive and needs a terms
-            # review, so there is no exit code to check here.
-            Write-Host "store    $($Tool.id): install $(Get-Field $Section 'id') interactively from the Microsoft Store; terms need review."
+            # review, so there is no exit code to check here. The action matches
+            # the Node plan and the sh twin, which call a store section "manual".
+            Write-Host "manual   $($Tool.id): install $(Get-Field $Section 'id') interactively from the Microsoft Store; terms need review."
         }
         'scoop' {
             if (Test-ScoopInstalled (Get-Field $Section 'package')) {

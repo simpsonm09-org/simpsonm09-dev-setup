@@ -162,6 +162,12 @@ function hostPlatform() {
   return 'unknown';
 }
 
+// The plan-agreement contract is the action set: for every tool the plan names
+// the tool id, the manager, and the action (install, opt-in, manual, or
+// deferred). Presence is not part of it. The Node plan runs on the host and the
+// shell plan runs on the target, which for WSL are different machines, so
+// `present` versus `install` is a per-host convenience and may legitimately
+// differ. scripts/tools.test.mjs encodes this contract.
 export function planLines(manifest, platform) {
   const lines = [`host platform: ${platform}`];
   for (const tool of manifest.tools) {

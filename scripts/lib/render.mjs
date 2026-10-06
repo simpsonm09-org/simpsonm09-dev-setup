@@ -181,6 +181,11 @@ entry exists, and never an unofficial mirror. Microsoft Store apps need interact
 review of their terms, so the apply scripts leave them for a manual install. Existing
 installations are detected and left unchanged; a version pin applies only to a new
 install.
+
+The host and shell plans agree on the action set: the tool id, the manager, and the
+action. Whether a tool is already present is a per-host convenience, so the Node plan
+on the host and the shell plan on the target may report \`present\` versus \`install\`
+for the same tool.
 `;
 }
 
