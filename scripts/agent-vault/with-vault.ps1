@@ -11,6 +11,9 @@
 # the config file and the identity:
 #   human  %USERPROFILE%\.config\agent-vault\human.env  Human-Vault-Runner
 #   agent  %USERPROFILE%\.config\agent-vault\env        Agent-Vault-Runner
+#
+# A tool with no working Windows binary runs through the WSL wrapper at
+# ~/.local/bin/with-vault, so the credential path and the roles are unchanged.
 param([Parameter(ValueFromRemainingArguments = $true)][string[]] $Command)
 
 $ErrorActionPreference = 'Stop'
@@ -37,6 +40,28 @@ if ($rest.Count -eq 0) {
 $tool = $rest[0]
 $toolArgs = @()
 if ($rest.Count -gt 1) { $toolArgs = $rest[1..($rest.Count - 1)] }
+
+# Tools the WSL wrapper owns because Windows cannot drive them through the
+# vault. discli runs on aiohttp, which ignores the proxy on Windows, so the
+# placeholder token would reach Discord unmapped.
+$wslTools = @('discli')
+$windowsCommand = if ($wslTools -contains $tool) { $null } else { Get-Command $tool -ErrorAction SilentlyContinue }
+
+# No Windows binary: hand the whole run to the WSL wrapper, which reads its own
+# role config and maps the bundle the same way.
+if (-not $windowsCommand) {
+    if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
+        throw "with-vault: $tool has no Windows binary and WSL is not available"
+    }
+    $wslArgs = New-Object System.Collections.Generic.List[string]
+    $wslArgs.Add('--role'); $wslArgs.Add($role)
+    if ($bundle) { $wslArgs.Add('--bundle'); $wslArgs.Add($bundle) }
+    $wslArgs.Add($tool)
+    foreach ($toolArg in $toolArgs) { $wslArgs.Add($toolArg) }
+    $quoted = ($wslArgs | ForEach-Object { "'" + $_.Replace("'", "'\''") + "'" }) -join ' '
+    & wsl -e bash -lc "with-vault $quoted"
+    exit $LASTEXITCODE
+}
 
 $configName = if ($role -eq 'human') { 'human.env' } else { 'env' }
 $configPath = Join-Path $env:USERPROFILE ".config\agent-vault\$configName"
