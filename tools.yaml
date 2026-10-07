@@ -188,6 +188,7 @@ tools:
     kind: app
     consumers:
       - human
+      - agent
     policy: latest
     note: Both machines run Docker Engine inside Ubuntu WSL2; Docker Desktop is opt-in only.
     installByDefault: false

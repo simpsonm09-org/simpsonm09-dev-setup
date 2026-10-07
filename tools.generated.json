@@ -203,7 +203,8 @@
       "role": "Linux containers through WSL2",
       "kind": "app",
       "consumers": [
-        "human"
+        "human",
+        "agent"
       ],
       "policy": "latest",
       "note": "Both machines run Docker Engine inside Ubuntu WSL2; Docker Desktop is opt-in only.",
