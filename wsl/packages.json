@@ -32,6 +32,22 @@
     {
       "id": "newman",
       "package": "newman"
+    },
+    {
+      "id": "infisical",
+      "package": "@infisical/cli"
+    },
+    {
+      "id": "playwright-cli",
+      "package": "@playwright/cli"
+    },
+    {
+      "id": "chrome-devtools",
+      "package": "chrome-devtools"
+    },
+    {
+      "id": "ctx7",
+      "package": "ctx7"
     }
   ],
   "packagePolicy": "latest from configured apt sources",
@@ -41,6 +57,20 @@
       "note": "Install from the official V2 command; credentials stay in local auth storage.",
       "observedVersion": "2.0.18",
       "updateCommand": "opencode upgrade",
+      "managedByBootstrap": false
+    },
+    "mise": {
+      "url": "https://mise.jdx.dev/installing-mise.html",
+      "note": null,
+      "observedVersion": null,
+      "updateCommand": null,
+      "managedByBootstrap": false
+    },
+    "trivy": {
+      "url": "https://trivy.dev/latest/docs/installation/",
+      "note": null,
+      "observedVersion": null,
+      "updateCommand": null,
       "managedByBootstrap": false
     }
   },

@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import {
+  AGENT_FILES,
+  agentToolLines,
   checkArtifacts,
   loadManifest,
   planLines,
@@ -97,6 +99,10 @@ test('renderWslPackages covers every WSL manager tools.yaml declares', () => {
   assert.deepEqual(wsl.npmPackages, [
     { id: 'postman-cli', package: 'postman-cli' },
     { id: 'newman', package: 'newman' },
+    { id: 'infisical', package: '@infisical/cli' },
+    { id: 'playwright-cli', package: '@playwright/cli' },
+    { id: 'chrome-devtools', package: 'chrome-devtools' },
+    { id: 'ctx7', package: 'ctx7' },
   ]);
   assert.deepEqual(wsl.snapPackages, [{ id: 'terminal', package: 'ghostty', classic: true }]);
   assert.equal(wsl.manualTools.opencode.updateCommand, 'opencode upgrade');
@@ -160,6 +166,34 @@ test('validation rejects a tool with no role', () => {
   assert.match(validateManifest(manifest).join('\n'), /x: role is required/);
 });
 
+test('validation rejects a tool with no consumers', () => {
+  const manifest = {
+    tools: [{ id: 'x', name: 'X', role: 'r', kind: 'cli', wsl: { manager: 'apt', package: 'x' } }],
+  };
+  assert.match(validateManifest(manifest).join('\n'), /x: consumers must be a non-empty list/);
+});
+
+test('validation rejects an empty consumers list', () => {
+  const manifest = {
+    tools: [{ id: 'x', name: 'X', role: 'r', kind: 'cli', consumers: [], wsl: { manager: 'apt', package: 'x' } }],
+  };
+  assert.match(validateManifest(manifest).join('\n'), /x: consumers must be a non-empty list/);
+});
+
+test('validation rejects a consumer that is not human or agent', () => {
+  const manifest = {
+    tools: [{ id: 'x', name: 'X', role: 'r', kind: 'cli', consumers: ['robot'], wsl: { manager: 'apt', package: 'x' } }],
+  };
+  assert.match(validateManifest(manifest).join('\n'), /x: consumer "robot" is not one of human, agent/);
+});
+
+test('validation accepts a consumers list of human and agent', () => {
+  const manifest = {
+    tools: [{ id: 'x', name: 'X', role: 'r', kind: 'cli', consumers: ['human', 'agent'], wsl: { manager: 'apt', package: 'x' } }],
+  };
+  assert.deepEqual(validateManifest(manifest), []);
+});
+
 test('check rejects a string equivalents without throwing', () => {
   const manifest = {
     tools: [{ id: 'x', name: 'X', role: 'r', kind: 'cli', equivalents: 'noctty', wsl: { manager: 'apt', package: 'x' } }],
@@ -170,9 +204,69 @@ test('check rejects a string equivalents without throwing', () => {
 });
 
 test('render and check exit 0 through the CLI', () => {
-  for (const command of ['render', 'check']) {
+  for (const command of ['render', 'check', 'ai', 'ai-check']) {
     const result = runCli(command);
     assert.equal(result.status, 0, `${command}: ${result.stderr}`);
+  }
+});
+
+test('the agent tool set is exactly the tools whose consumers name agent', () => {
+  const manifest = loadManifest(REPO_ROOT);
+  const lines = agentToolLines(manifest);
+  assert.match(lines[0], /^agent tools: \d+$/);
+  const ids = lines.slice(1).map((line) => line.trim().split('\t')[0]);
+  const expected = manifest.tools.filter((tool) => tool.consumers.includes('agent')).map((tool) => tool.id);
+  assert.deepEqual(ids, expected);
+  assert.ok(ids.includes('trivy'));
+  assert.ok(!ids.includes('chrome'), 'a human-only app stays out of the agent set');
+});
+
+test('agent-tools.json holds id, name, role, kind, and per-platform install', () => {
+  const manifest = loadManifest(REPO_ROOT);
+  const data = JSON.parse(renderArtifacts(manifest)['agent-tools.json']);
+  const agentTools = manifest.tools.filter((tool) => tool.consumers.includes('agent'));
+  assert.deepEqual(data.tools.map((entry) => entry.id), agentTools.map((tool) => tool.id));
+  for (const entry of data.tools) {
+    assert.equal(typeof entry.name, 'string');
+    assert.equal(typeof entry.role, 'string');
+    assert.ok(entry.kind === 'app' || entry.kind === 'cli');
+    assert.ok(Object.keys(entry.install).length > 0, `${entry.id}: install is empty`);
+  }
+  const ids = new Set(data.tools.map((entry) => entry.id));
+  assert.ok(!ids.has('chrome'));
+  for (const id of ['mise', 'infisical', 'trivy', 'playwright-cli', 'chrome-devtools', 'ctx7']) {
+    assert.ok(ids.has(id), `${id} is in the agent tool set`);
+  }
+});
+
+test('docs/agent-tools.md renders the agent tools as a table', () => {
+  const manifest = loadManifest(REPO_ROOT);
+  const doc = renderArtifacts(manifest)['docs/agent-tools.md'];
+  assert.match(doc, /^# Agent tools/m);
+  assert.match(doc, /\| Tool \| Role \| Install \|/);
+  assert.match(doc, /Trivy/);
+  assert.doesNotMatch(doc, /Google Chrome/);
+});
+
+test('check fails when an agent artifact is stale or missing', () => {
+  const manifest = loadManifest(REPO_ROOT);
+  const root = mkdtempSync(join(tmpdir(), 'tools-agent-'));
+  try {
+    materialize(root, manifest);
+    assert.deepEqual(checkArtifacts(root, manifest, AGENT_FILES), []);
+    const stale = join(root, 'agent-tools.json');
+    writeFileSync(stale, `${readFileSync(stale, 'utf8')}stale edit\n`);
+    const staleErrors = checkArtifacts(root, manifest, AGENT_FILES);
+    assert.equal(staleErrors.length, 1);
+    assert.match(staleErrors[0], /agent-tools\.json is out of date/);
+
+    writeFileSync(stale, renderArtifacts(manifest)['agent-tools.json']);
+    rmSync(join(root, 'docs', 'agent-tools.md'));
+    const missingErrors = checkArtifacts(root, manifest, AGENT_FILES);
+    assert.equal(missingErrors.length, 1);
+    assert.match(missingErrors[0], /docs[/\\]agent-tools\.md is missing/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
 });
 

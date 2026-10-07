@@ -119,5 +119,23 @@
     "installByDefault": true,
     "version": null,
     "versionPolicy": "latest"
+  },
+  {
+    "name": "mise",
+    "id": "jdx.mise",
+    "source": "winget",
+    "role": "Pinned tool versions",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
+    "name": "Trivy",
+    "id": "AquaSecurity.Trivy",
+    "source": "winget",
+    "role": "Dependency, secret, and misconfig scan",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest"
   }
 ]

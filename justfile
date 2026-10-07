@@ -44,6 +44,14 @@ tools-render:
 tools-check:
     node scripts/tools.mjs check
 
+# Print the agent tool set and change nothing.
+tools-ai:
+    node scripts/tools.mjs ai
+
+# Validate tools.yaml and fail when an agent artifact is stale.
+tools-ai-check:
+    node scripts/tools.mjs ai-check
+
 # Install the machine tools. Windows drives winget then WSL; macOS uses brew.
 tools-apply:
     {{ if os_family() == "windows" { "pwsh -File scripts/apply-tools.ps1 apply" } else { "bash scripts/apply-tools.sh apply" } }}

@@ -3,13 +3,14 @@
 # This file is the single hand-edited source of the tool data. scripts/tools.mjs
 # renders the per-platform artifacts from it:
 #   Brewfile, windows/apps.json, windows/manual-apps.json, wsl/packages.json,
-#   tools.generated.json, docs/apps.md
+#   tools.generated.json, docs/apps.md, agent-tools.json, docs/agent-tools.md
 # Edit this file, then run `just tools-render`. `just tools-check` fails when an
-# artifact is stale. `just tools` prints this host's plan.
+# artifact is stale. `just tools` prints this host's plan. `just tools-ai` prints
+# the agent tool set and `just tools-ai-check` checks the agent artifacts.
 #
 # Schema
 #   tools[]        one logical tool per capability
-#     id, name, role, kind (app|cli)
+#     id, name, role, kind (app|cli), consumers (human|agent)
 #     equivalents  cross-platform stand-ins
 #     policy       latest | vendor-auto-update | store-managed | <pinned version>
 #     installByDefault, requiresExplicitOptIn, note
@@ -33,6 +34,9 @@ tools:
     name: Git
     role: Version control
     kind: cli
+    consumers:
+      - human
+      - agent
     wsl:
       manager: apt
       package: git
@@ -41,6 +45,9 @@ tools:
     name: curl
     role: HTTP client
     kind: cli
+    consumers:
+      - human
+      - agent
     wsl:
       manager: apt
       package: curl
@@ -49,6 +56,9 @@ tools:
     name: CA certificates
     role: TLS trust store
     kind: cli
+    consumers:
+      - human
+      - agent
     wsl:
       manager: apt
       package: ca-certificates
@@ -57,6 +67,9 @@ tools:
     name: unzip
     role: Archive extraction
     kind: cli
+    consumers:
+      - human
+      - agent
     wsl:
       manager: apt
       package: unzip
@@ -65,6 +78,9 @@ tools:
     name: GnuPG
     role: Signature and key handling
     kind: cli
+    consumers:
+      - human
+      - agent
     wsl:
       manager: apt
       package: gnupg
@@ -74,6 +90,8 @@ tools:
     name: Google Chrome
     role: Default development browser
     kind: app
+    consumers:
+      - human
     policy: vendor-auto-update
     note: Keep Chrome's own security auto-updates; do not freeze a stale browser build.
     windows:
@@ -87,6 +105,8 @@ tools:
     name: GitHub Desktop
     role: Routine Git pull/push UI
     kind: app
+    consumers:
+      - human
     policy: latest
     windows:
       manager: winget
@@ -99,6 +119,8 @@ tools:
     name: Terminal
     role: GPU-accelerated terminal
     kind: app
+    consumers:
+      - human
     equivalents:
       - noctty
       - ghostty
@@ -122,6 +144,8 @@ tools:
     name: Sublime Text 4
     role: Text editing
     kind: app
+    consumers:
+      - human
     policy: latest
     windows:
       manager: winget
@@ -134,6 +158,8 @@ tools:
     name: Zed
     role: IDE
     kind: app
+    consumers:
+      - human
     policy: latest
     windows:
       manager: winget
@@ -146,6 +172,8 @@ tools:
     name: Postman
     role: API testing
     kind: app
+    consumers:
+      - human
     policy: latest
     windows:
       manager: winget
@@ -158,6 +186,8 @@ tools:
     name: Docker Desktop
     role: Linux containers through WSL2
     kind: app
+    consumers:
+      - human
     policy: latest
     note: Both machines run Docker Engine inside Ubuntu WSL2; Docker Desktop is opt-in only.
     installByDefault: false
@@ -182,6 +212,8 @@ tools:
     name: OneNote
     role: Notes; current OneNote app
     kind: app
+    consumers:
+      - human
     policy: store-managed
     windows:
       manager: msstore
@@ -191,6 +223,8 @@ tools:
     name: OpenChamber
     role: OpenCode GUI
     kind: app
+    consumers:
+      - human
     note: No matching winget package; install and update from the official release.
     windows:
       manager: manual
@@ -204,6 +238,9 @@ tools:
     name: GitHub CLI
     role: CLI-only GitHub tasks
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     windows:
       manager: winget
@@ -222,6 +259,9 @@ tools:
     name: Kubernetes CLI
     role: Kubernetes objects
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     windows:
       manager: winget
@@ -234,6 +274,9 @@ tools:
     name: Helm
     role: Kubernetes packaging
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     windows:
       manager: winget
@@ -246,6 +289,9 @@ tools:
     name: HashiCorp Vault
     role: Vault secrets
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     windows:
       manager: winget
@@ -258,6 +304,9 @@ tools:
     name: Kustomize
     role: Kubernetes manifest rendering
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     windows:
       manager: winget
@@ -270,6 +319,9 @@ tools:
     name: Postman CLI
     role: Postman cloud
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     windows:
       manager: npm
@@ -285,6 +337,9 @@ tools:
     name: Newman
     role: Postman collection runs
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     windows:
       manager: npm
@@ -300,6 +355,9 @@ tools:
     name: Atlassian CLI
     role: Jira and Atlassian
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     windows:
       manager: manual
@@ -312,6 +370,9 @@ tools:
     name: Jenkins CLI
     role: Jenkins jobs and builds
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     note: Download the controller jar from <url>/jnlpJars/jenkins-cli.jar.
     windows:
@@ -325,6 +386,9 @@ tools:
     name: just
     role: Repository tasks
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     note: Pinned in mise.toml; run mise install in the repository.
     windows:
@@ -338,6 +402,9 @@ tools:
     name: Himalaya
     role: Send from the Gmail mailbox
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     windows:
       manager: scoop
@@ -353,6 +420,9 @@ tools:
     name: ntfy
     role: Phone notifications
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     windows:
       manager: scoop
@@ -368,6 +438,9 @@ tools:
     name: SMS Gateway
     role: Texting via an Android phone
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     windows:
       manager: manual
@@ -380,6 +453,9 @@ tools:
     name: OpenCode CLI
     role: AI CLI
     kind: cli
+    consumers:
+      - human
+      - agent
     policy: latest
     note: Installed separately from the package bootstrap; credentials stay in local auth storage.
     wsl:
@@ -387,3 +463,111 @@ tools:
       note: Install from the official V2 command; credentials stay in local auth storage.
       observedVersion: "2.0.18"
       updateCommand: opencode upgrade
+
+  # Agent and service-owner CLI tools. The service-integrations registry names
+  # mise, infisical, trivy, playwright-cli, chrome-devtools, and ctx7.
+  - id: mise
+    name: mise
+    role: Pinned tool versions
+    kind: cli
+    consumers:
+      - human
+      - agent
+    policy: latest
+    note: Installs the versions pinned in mise.toml, including just.
+    windows:
+      manager: winget
+      id: jdx.mise
+    wsl:
+      manager: manual
+      url: https://mise.jdx.dev/installing-mise.html
+    macos:
+      manager: brew
+      formula: mise
+
+  - id: infisical
+    name: Infisical CLI
+    role: Workspace secrets source
+    kind: cli
+    consumers:
+      - human
+      - agent
+    policy: latest
+    windows:
+      manager: npm
+      package: "@infisical/cli"
+    wsl:
+      manager: npm
+      package: "@infisical/cli"
+    macos:
+      manager: npm
+      package: "@infisical/cli"
+
+  - id: trivy
+    name: Trivy
+    role: Dependency, secret, and misconfig scan
+    kind: cli
+    consumers:
+      - human
+      - agent
+    policy: latest
+    windows:
+      manager: winget
+      id: AquaSecurity.Trivy
+    wsl:
+      manager: manual
+      url: https://trivy.dev/latest/docs/installation/
+    macos:
+      manager: brew
+      formula: trivy
+
+  - id: playwright-cli
+    name: Playwright CLI
+    role: Browser automation and capture
+    kind: cli
+    consumers:
+      - agent
+    policy: latest
+    windows:
+      manager: npm
+      package: "@playwright/cli"
+    wsl:
+      manager: npm
+      package: "@playwright/cli"
+    macos:
+      manager: npm
+      package: "@playwright/cli"
+
+  - id: chrome-devtools
+    name: Chrome DevTools CLI
+    role: Chrome performance and debugging
+    kind: cli
+    consumers:
+      - agent
+    policy: latest
+    windows:
+      manager: npm
+      package: chrome-devtools
+    wsl:
+      manager: npm
+      package: chrome-devtools
+    macos:
+      manager: npm
+      package: chrome-devtools
+
+  - id: ctx7
+    name: Context7 CLI
+    role: Library documentation context
+    kind: cli
+    consumers:
+      - agent
+    policy: latest
+    windows:
+      manager: npm
+      package: ctx7
+    wsl:
+      manager: npm
+      package: ctx7
+    macos:
+      manager: npm
+      package: ctx7
