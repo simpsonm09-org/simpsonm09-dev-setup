@@ -89,16 +89,6 @@
       }
     },
     {
-      "id": "vault",
-      "name": "HashiCorp Vault",
-      "role": "Vault secrets",
-      "kind": "cli",
-      "install": {
-        "windows": "winget `Hashicorp.Vault`",
-        "macos": "brew `vault`"
-      }
-    },
-    {
       "id": "kustomize",
       "name": "Kustomize",
       "role": "Kubernetes manifest rendering",
