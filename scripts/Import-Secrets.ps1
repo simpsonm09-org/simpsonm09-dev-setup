@@ -5,11 +5,12 @@ param(
     [switch] $Apply
 )
 
-# Resolves the integration secrets and sets them as Windows user environment
+# Resolves the integration values and sets them as Windows user environment
 # variables, so OpenChamber's server inherits them on restart. The bootstrap
-# file at Path holds the Infisical machine identity; the secrets themselves come
-# from Infisical and fall back to the file's own values when it is unreachable.
-# Values are never printed. Audit is the default.
+# file at Path holds the Infisical machine identity and an offline fallback.
+# The values come from the /secrets and /pii folders of the Infisical project
+# and fall back to the file's own values when it is unreachable. Values are
+# never printed. Audit is the default.
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -41,6 +42,20 @@ function Invoke-Infisical {
     return ''
 }
 
+function Get-InfisicalFolder {
+    param([string] $Token, [string] $ProjectId, [string] $Environment, [string] $Folder)
+    # Read one folder of the project as a hashtable, or $null when the folder
+    # yields nothing so the caller keeps the .env fallback for it.
+    $json = Invoke-Infisical @('export', '--token', $Token, '--projectId', $ProjectId, '--env', $Environment, '--path', $Folder, '--format', 'json', '--silent')
+    if (-not $json) { return $null }
+    $values = [ordered]@{}
+    foreach ($item in @($json | ConvertFrom-Json)) {
+        if ($item.key -and $item.value) { $values[$item.key] = $item.value }
+    }
+    if ($values.Count -eq 0) { return $null }
+    return $values
+}
+
 $file = [ordered]@{}
 foreach ($line in Get-Content -LiteralPath $Path) {
     $trimmed = $line.Trim()
@@ -67,13 +82,18 @@ if ($configured) {
 
     $token = Invoke-Infisical @('login', '--method=universal-auth', '--plain', '--silent')
     if ($token) {
-        $json = Invoke-Infisical @('export', '--token', $token, '--projectId', $file['INFISICAL_PROJECT_ID'], '--env', $environment, '--format', 'json', '--silent')
-        if ($json) {
-            $items = @($json | ConvertFrom-Json)
-            foreach ($item in $items) {
-                if ($item.key -and $item.value) { $secrets[$item.key] = $item.value }
+        $loaded = 0
+        foreach ($folder in @('/secrets', '/pii')) {
+            $values = Get-InfisicalFolder -Token $token -ProjectId $file['INFISICAL_PROJECT_ID'] -Environment $environment -Folder $folder
+            if ($null -ne $values) {
+                foreach ($key in $values.Keys) { $secrets[$key] = $values[$key] }
+                $loaded++
+            } else {
+                Write-Warning "Infisical export $folder returned nothing; .env values stay in effect for it."
             }
-            Write-Host "Infisical: exported $($items.Count) secret(s)"
+        }
+        if ($loaded -gt 0) {
+            Write-Host "Infisical: exported from /secrets and /pii ($loaded folder(s))"
         } else {
             Write-Warning 'Infisical export returned nothing; using .env values only.'
         }
