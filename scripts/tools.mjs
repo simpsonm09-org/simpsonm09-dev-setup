@@ -15,7 +15,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { parseYaml } from './lib/yaml.mjs';
-import { installLabel, renderArtifacts, sectionPackages } from './lib/render.mjs';
+import { consumesAgent, installLabel, platformInstall, renderArtifacts, sectionPackages } from './lib/render.mjs';
 
 export { parseYaml, renderArtifacts };
 
@@ -31,6 +31,8 @@ export const MANIFEST_FILE = 'tools.yaml';
 //   wsl/packages.json         wsl/bootstrap.sh and wsl/install-docker-engine.sh
 //   tools.generated.json      apply-tools.ps1 and apply-tools.sh read the full plan
 //   docs/apps.md              humans read the rendered tables
+//   agent-tools.json          a tool consumer reads the agent-consumer subset
+//   docs/agent-tools.md       humans read the agent-consumer tables
 export const GENERATED_FILES = [
   'Brewfile',
   'windows/apps.json',
@@ -38,18 +40,26 @@ export const GENERATED_FILES = [
   'wsl/packages.json',
   'tools.generated.json',
   'docs/apps.md',
+  'agent-tools.json',
+  'docs/agent-tools.md',
 ];
+
+// The subset an agent-facing check covers: the manifest, then these artifacts.
+export const AGENT_FILES = ['agent-tools.json', 'docs/agent-tools.md'];
 
 export const MANAGERS = new Set(['winget', 'msstore', 'scoop', 'brew', 'apt', 'snap', 'npm', 'manual']);
 export const KINDS = new Set(['app', 'cli']);
+export const CONSUMERS = new Set(['human', 'agent']);
 const PLATFORMS = ['windows', 'wsl', 'macos'];
 
 const USAGE = `usage: node scripts/tools.mjs <command>
 
 commands:
-  render   regenerate every artifact from ${MANIFEST_FILE}
-  check    validate ${MANIFEST_FILE} and fail on a stale artifact
-  plan     print this host's install plan and change nothing
+  render      regenerate every artifact from ${MANIFEST_FILE}
+  check       validate ${MANIFEST_FILE} and fail on a stale artifact
+  plan        print this host's install plan and change nothing
+  ai          print the agent tool set and change nothing
+  ai-check    validate ${MANIFEST_FILE} and fail on a stale agent artifact
 `;
 
 // --- Manifest ---------------------------------------------------------------
@@ -123,6 +133,15 @@ export function validateManifest(manifest) {
     if (typeof tool.name !== 'string' || tool.name === '') errors.push(`${tool.id}: name is required`);
     if (typeof tool.role !== 'string' || tool.role === '') errors.push(`${tool.id}: role is required`);
     if (!KINDS.has(tool.kind)) errors.push(`${tool.id}: kind must be app or cli`);
+    if (!Array.isArray(tool.consumers) || tool.consumers.length === 0) {
+      errors.push(`${tool.id}: consumers must be a non-empty list`);
+    } else {
+      for (const consumer of tool.consumers) {
+        if (!CONSUMERS.has(consumer)) {
+          errors.push(`${tool.id}: consumer "${consumer}" is not one of ${[...CONSUMERS].join(', ')}`);
+        }
+      }
+    }
     if (tool.equivalents !== undefined
       && (!Array.isArray(tool.equivalents) || tool.equivalents.some((entry) => typeof entry !== 'string'))) {
       errors.push(`${tool.id}: equivalents must be a list of strings`);
@@ -138,17 +157,17 @@ export function validateManifest(manifest) {
 
 // Validate first, then compare artifacts. Bad input returns schema errors and
 // never reaches a renderer, so a null tool cannot throw a TypeError.
-export function checkArtifacts(root, manifest) {
+export function checkArtifacts(root, manifest, files = GENERATED_FILES) {
   const errors = validateManifest(manifest);
   if (errors.length > 0) return errors;
   const rendered = renderArtifacts(manifest);
-  for (const [relative, expected] of Object.entries(rendered)) {
+  for (const relative of files) {
     const path = join(root, relative);
     if (!existsSync(path)) {
       errors.push(`${relative} is missing; run node scripts/tools.mjs render`);
       continue;
     }
-    if (readFileSync(path, 'utf8').replace(/^\uFEFF/, '') !== expected) {
+    if (readFileSync(path, 'utf8').replace(/^\uFEFF/, '') !== rendered[relative]) {
       errors.push(`${relative} is out of date; run node scripts/tools.mjs render`);
     }
   }
@@ -197,6 +216,21 @@ function printPlan(manifest, platform) {
   process.stdout.write(`${planLines(manifest, platform).join('\n')}\n`);
 }
 
+// The agent tool set, as the same compact shape the plan uses: the tool id,
+// its kind, and every platform it declares.
+export function agentToolLines(manifest) {
+  const tools = manifest.tools.filter(consumesAgent);
+  const lines = [`agent tools: ${tools.length}`];
+  for (const tool of tools) {
+    lines.push(`  ${tool.id}\t${tool.kind}\t${platformInstall(tool)}`);
+  }
+  return lines;
+}
+
+function printAgentTools(manifest) {
+  process.stdout.write(`${agentToolLines(manifest).join('\n')}\n`);
+}
+
 function main() {
   const command = process.argv[2] ?? 'help';
   if (command === 'help' || command === '-h' || command === '--help') {
@@ -231,6 +265,18 @@ function main() {
     const errors = validateManifest(manifest);
     if (errors.length > 0) fail(errors);
     printPlan(manifest, hostPlatform());
+    return;
+  }
+  if (command === 'ai') {
+    const errors = validateManifest(manifest);
+    if (errors.length > 0) fail(errors);
+    printAgentTools(manifest);
+    return;
+  }
+  if (command === 'ai-check') {
+    const errors = checkArtifacts(REPO_ROOT, manifest, AGENT_FILES);
+    if (errors.length > 0) fail(errors);
+    process.stdout.write(`ai-check: ok (${manifest.tools.filter(consumesAgent).length} agent tools, ${AGENT_FILES.length} artifacts)\n`);
     return;
   }
   process.stderr.write(`tools: unknown command "${command}"\n${USAGE}`);

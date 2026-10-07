@@ -1,0 +1,258 @@
+{
+  "generatedBy": "scripts/tools.mjs",
+  "tools": [
+    {
+      "id": "git",
+      "name": "Git",
+      "role": "Version control",
+      "kind": "cli",
+      "install": {
+        "wsl": "apt `git`"
+      }
+    },
+    {
+      "id": "curl",
+      "name": "curl",
+      "role": "HTTP client",
+      "kind": "cli",
+      "install": {
+        "wsl": "apt `curl`"
+      }
+    },
+    {
+      "id": "ca-certificates",
+      "name": "CA certificates",
+      "role": "TLS trust store",
+      "kind": "cli",
+      "install": {
+        "wsl": "apt `ca-certificates`"
+      }
+    },
+    {
+      "id": "unzip",
+      "name": "unzip",
+      "role": "Archive extraction",
+      "kind": "cli",
+      "install": {
+        "wsl": "apt `unzip`"
+      }
+    },
+    {
+      "id": "gnupg",
+      "name": "GnuPG",
+      "role": "Signature and key handling",
+      "kind": "cli",
+      "install": {
+        "wsl": "apt `gnupg`"
+      }
+    },
+    {
+      "id": "gh",
+      "name": "GitHub CLI",
+      "role": "CLI-only GitHub tasks",
+      "kind": "cli",
+      "install": {
+        "windows": "winget `GitHub.cli`",
+        "wsl": "apt `gh`",
+        "macos": "brew `gh`"
+      }
+    },
+    {
+      "id": "kubectl",
+      "name": "Kubernetes CLI",
+      "role": "Kubernetes objects",
+      "kind": "cli",
+      "install": {
+        "windows": "winget `Kubernetes.kubectl`",
+        "macos": "brew `kubectl`"
+      }
+    },
+    {
+      "id": "helm",
+      "name": "Helm",
+      "role": "Kubernetes packaging",
+      "kind": "cli",
+      "install": {
+        "windows": "winget `Helm.Helm`",
+        "macos": "brew `helm`"
+      }
+    },
+    {
+      "id": "vault",
+      "name": "HashiCorp Vault",
+      "role": "Vault secrets",
+      "kind": "cli",
+      "install": {
+        "windows": "winget `Hashicorp.Vault`",
+        "macos": "brew `vault`"
+      }
+    },
+    {
+      "id": "kustomize",
+      "name": "Kustomize",
+      "role": "Kubernetes manifest rendering",
+      "kind": "cli",
+      "install": {
+        "windows": "winget `Kubernetes.kustomize`",
+        "macos": "brew `kustomize`"
+      }
+    },
+    {
+      "id": "postman-cli",
+      "name": "Postman CLI",
+      "role": "Postman cloud",
+      "kind": "cli",
+      "install": {
+        "windows": "npm `postman-cli`",
+        "wsl": "npm `postman-cli`",
+        "macos": "npm `postman-cli`"
+      }
+    },
+    {
+      "id": "newman",
+      "name": "Newman",
+      "role": "Postman collection runs",
+      "kind": "cli",
+      "install": {
+        "windows": "npm `newman`",
+        "wsl": "npm `newman`",
+        "macos": "npm `newman`"
+      }
+    },
+    {
+      "id": "acli",
+      "name": "Atlassian CLI",
+      "role": "Jira and Atlassian",
+      "kind": "cli",
+      "install": {
+        "windows": "manual (https://developer.atlassian.com/cloud/acli/)",
+        "macos": "manual (https://developer.atlassian.com/cloud/acli/)"
+      }
+    },
+    {
+      "id": "jenkins-cli",
+      "name": "Jenkins CLI",
+      "role": "Jenkins jobs and builds",
+      "kind": "cli",
+      "install": {
+        "windows": "manual (https://www.jenkins.io/doc/book/managing/cli/)",
+        "macos": "manual (https://www.jenkins.io/doc/book/managing/cli/)"
+      }
+    },
+    {
+      "id": "just",
+      "name": "just",
+      "role": "Repository tasks",
+      "kind": "cli",
+      "install": {
+        "windows": "manual",
+        "macos": "manual"
+      }
+    },
+    {
+      "id": "himalaya",
+      "name": "Himalaya",
+      "role": "Send from the Gmail mailbox",
+      "kind": "cli",
+      "install": {
+        "windows": "scoop `himalaya`",
+        "macos": "brew `himalaya`"
+      }
+    },
+    {
+      "id": "ntfy",
+      "name": "ntfy",
+      "role": "Phone notifications",
+      "kind": "cli",
+      "install": {
+        "windows": "scoop `ntfy`",
+        "macos": "brew `ntfy`"
+      }
+    },
+    {
+      "id": "smsgate",
+      "name": "SMS Gateway",
+      "role": "Texting via an Android phone",
+      "kind": "cli",
+      "install": {
+        "windows": "manual (https://github.com/capcom6/android-sms-gateway/releases)",
+        "macos": "manual (https://github.com/capcom6/android-sms-gateway/releases)"
+      }
+    },
+    {
+      "id": "opencode",
+      "name": "OpenCode CLI",
+      "role": "AI CLI",
+      "kind": "cli",
+      "install": {
+        "wsl": "manual"
+      }
+    },
+    {
+      "id": "mise",
+      "name": "mise",
+      "role": "Pinned tool versions",
+      "kind": "cli",
+      "install": {
+        "windows": "winget `jdx.mise`",
+        "wsl": "manual (https://mise.jdx.dev/installing-mise.html)",
+        "macos": "brew `mise`"
+      }
+    },
+    {
+      "id": "infisical",
+      "name": "Infisical CLI",
+      "role": "Workspace secrets source",
+      "kind": "cli",
+      "install": {
+        "windows": "npm `@infisical/cli`",
+        "wsl": "npm `@infisical/cli`",
+        "macos": "npm `@infisical/cli`"
+      }
+    },
+    {
+      "id": "trivy",
+      "name": "Trivy",
+      "role": "Dependency, secret, and misconfig scan",
+      "kind": "cli",
+      "install": {
+        "windows": "winget `AquaSecurity.Trivy`",
+        "wsl": "manual (https://trivy.dev/latest/docs/installation/)",
+        "macos": "brew `trivy`"
+      }
+    },
+    {
+      "id": "playwright-cli",
+      "name": "Playwright CLI",
+      "role": "Browser automation and capture",
+      "kind": "cli",
+      "install": {
+        "windows": "npm `@playwright/cli`",
+        "wsl": "npm `@playwright/cli`",
+        "macos": "npm `@playwright/cli`"
+      }
+    },
+    {
+      "id": "chrome-devtools",
+      "name": "Chrome DevTools CLI",
+      "role": "Chrome performance and debugging",
+      "kind": "cli",
+      "install": {
+        "windows": "npm `chrome-devtools`",
+        "wsl": "npm `chrome-devtools`",
+        "macos": "npm `chrome-devtools`"
+      }
+    },
+    {
+      "id": "ctx7",
+      "name": "Context7 CLI",
+      "role": "Library documentation context",
+      "kind": "cli",
+      "install": {
+        "windows": "npm `ctx7`",
+        "wsl": "npm `ctx7`",
+        "macos": "npm `ctx7`"
+      }
+    }
+  ]
+}

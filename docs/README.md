@@ -7,6 +7,7 @@ Index for this repository.
 - [Project workflow](project-workflow.md) defines the clone and worktree layout.
 - [Setup](setup.md) is the safe setup order.
 - [Apps and roles](apps.md) lists the workstation apps and the install-source policy; it is generated from `tools.yaml`.
+- [Agent tools](agent-tools.md) lists the tools whose `consumers` list names `agent`; it is generated from `tools.yaml`.
 - [Application settings](app-settings.md) inventories Zed, Noctty, and OpenChamber.
 - [Secrets](secrets.md) covers the secrets manager setup.
 - [Workspace environment](workspace-environment.md) records the machine and app state around the workspace.
