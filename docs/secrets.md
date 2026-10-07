@@ -79,11 +79,15 @@ from a file, so each runtime needs a loader.
 - **WSL CLI** loads the workspace `.envrc` through direnv. It sources
   `settings/.env`, logs in with the machine identity, and runs `infisical export
   --path /secrets` and `--path /pii` to pull the values into the shell. For a
-  shell without direnv, source `wsl/load-secrets.sh` instead.
+  shell without direnv, source `wsl/load-secrets.sh`, or reach one command with
+  `with-secrets <tool>`, which loads the same values into that command only.
 - **Windows OpenChamber** runs the OpenCode server as a Windows process, which
   direnv cannot reach. `scripts/Import-Secrets.ps1` reads `settings/.env`, pulls
   the same two folders from Infisical, and sets them as Windows user environment
-  variables. Restart OpenChamber so its server inherits them.
+  variables. Restart OpenChamber so its server inherits them. For one command,
+  `with-secrets.ps1 <tool>` loads the same values into that process only.
+- **Discord and Postman for the agent** do not use the loader at all. They go
+  through the Agent Vault, described next.
 
 Both loaders are fail-open. When Infisical is unreachable, or a folder export
 returns nothing, the loader keeps the `.env` fallback and reports the failure
@@ -91,12 +95,67 @@ instead of stopping. The `.envrc` lives at the workspace root, so it covers
 every repository under `projects/repos`. A committed copy is at
 [`../settings/.envrc.example`](../settings/.envrc.example).
 
+## The Agent Vault
+
+The loader identity reads the project and exports the two folders. The Agent
+Vault is the other mechanism and it exports nothing. The proxy attaches one
+credential to one request on the wire, so a token never enters the process. Use
+it when a tool should reach a service without holding the credential.
+
+Two identities mint vault sessions, one per role:
+
+| Identity | Role | Used by |
+| --- | --- | --- |
+| `Agent-Vault-Runner` | agent | `with-vault --role agent` |
+| `Human-Vault-Runner` | human | `with-vault --role human` |
+
+`Ugallu-Desktop` stays the human's on-demand loader for `with-secrets` and
+direnv. It cannot be a vault identity, because Agent Vault rejects an identity
+that already belongs to another project.
+
+The proxy runs as the systemd user service `agent-vault-proxy` on
+`127.0.0.1:17323` in WSL. Windows reaches the same proxy at `localhost:17323`,
+because `127.0.0.1` is not forwarded from Windows to WSL. See
+[`manual-steps.md`](manual-steps.md) to enroll it and create the identities.
+
+### The command scheme
+
+One shape, `with-<source> <tool> [args]`.
+
+| Command | Identity | Mechanism |
+| --- | --- | --- |
+| `with-secrets <tool> [args]` | `Ugallu-Desktop` | Loader exports `/secrets` and `/pii` into that command only. |
+| `with-vault --role human <tool> [args]` | `Human-Vault-Runner` | Per-run vault session, credential attached by the proxy. |
+| `with-vault --role agent <tool> [args]` | `Agent-Vault-Runner` | Per-run vault session, credential attached by the proxy. |
+
+`--role` is required, so a run is never silently misattributed. `with-vault`
+maps a tool to its bundle and accepts `--bundle <name>` as an override:
+
+| Tool | Bundle |
+| --- | --- |
+| `discli` | `discord` |
+| `postman` | `postman` |
+| other | `--bundle <name>` required |
+
+Both wrappers read a role config outside the repository, at mode `0600`:
+
+- agent: `~/.config/agent-vault/env`, Windows `C:\Users\<user>\.config\agent-vault\env`
+- human: `~/.config/agent-vault/human.env`, Windows `C:\Users\<user>\.config\agent-vault\human.env`
+
+The wrapper sources the role's file, sets a placeholder token, and runs
+`infisical agent-vault run --access-bundle <bundle> --proxy <address>
+--client-id <id> --client-secret <secret> -- <tool> [args]`. For `discli` it also
+points `PYTHONPATH` at the `discord.py` shim, because `discord.py` on `aiohttp`
+ignores `HTTPS_PROXY`. The wrapper sources live in
+[`../scripts/agent-vault/`](../scripts/agent-vault/) and install to
+`~/.local/bin` and the Windows config directory.
+
 ## Create the folders and move the values
 
 Creating the `/secrets` and `/pii` folders in the live Infisical project and
 moving each value into the right folder is a manual step. It needs the running
 instance and an account that can write the project, so it is not scripted here.
-Do it once, in the Infisical UI:
+Done on this machine. On a new machine, do it once, in the Infisical UI:
 
 1. Open the project's `dev` environment.
 2. Create a folder `/secrets` and a folder `/pii`.

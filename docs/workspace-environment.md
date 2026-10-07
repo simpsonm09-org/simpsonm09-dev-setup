@@ -34,7 +34,9 @@ This writes `docs/workspace-environment.snapshot.json`. The script reads only th
 
 ### Secrets
 
-Integration secrets come from self-hosted Infisical at `http://localhost:8088` and are pulled per runtime. The `dev` environment holds two folders: `/secrets` for credentials, and `/pii` for PII and person or machine config. The bootstrap file `settings/.env` holds only the machine identity that unlocks the project plus a small offline fallback, and it is gitignored. WSL loads the folders through the workspace `.envrc` with direnv; Windows OpenChamber loads them through `scripts/Import-Secrets.ps1 -Apply`. See [`secrets.md`](secrets.md).
+Integration secrets come from self-hosted Infisical at `http://localhost:8088` and are pulled per runtime. The `dev` environment holds two folders: `/secrets` for credentials, and `/pii` for PII and person or machine config. The bootstrap file `settings/.env` holds only the machine identity that unlocks the project plus a small offline fallback, and it is gitignored. WSL loads the folders through the workspace `.envrc` with direnv; Windows OpenChamber loads them through `scripts/Import-Secrets.ps1 -Apply`. The `with-secrets` and `with-vault` wrappers load the same values into one command.
+
+The Agent Vault proxy runs as the systemd user service `agent-vault-proxy` on `127.0.0.1:17323`, brokering `discord` and `postman` requests for the `Agent-Vault-Runner` and `Human-Vault-Runner` identities. The role configs live outside the repositories at `~/.config/agent-vault/env` and `~/.config/agent-vault/human.env`, at mode `0600`. See [`secrets.md`](secrets.md).
 
 ### Runtime tools
 

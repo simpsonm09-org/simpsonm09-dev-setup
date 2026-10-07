@@ -12,6 +12,10 @@ The requested root is `D:\dev\simpsonm09`, which WSL sees at `/mnt/d/dev/simpson
 
 Both machines run Docker Engine inside Ubuntu WSL, and GitHub CLI is authenticated in WSL. The shared OpenCode and PStack workspace bundle is installed into `D:\dev\simpsonm09` by `maxstack`. Shared tool settings live under `settings/windows/` for Zed, Noctty, and OpenChamber.
 
+## Secrets and the Agent Vault
+
+The human loads secrets on demand with `with-secrets <tool>`, which pulls `/secrets` and `/pii` from Infisical into that one command. The agent reaches Discord and Postman through the Agent Vault with `with-vault --role agent <tool>`, where the proxy attaches the credential on the wire and no token enters the process. The human can use the same wrapper as `with-vault --role human`, which is attributed to a separate identity. `--role` is required, so a run is never silently misattributed. The wrapper sources live in [`scripts/agent-vault/`](scripts/agent-vault/), and [`docs/secrets.md`](docs/secrets.md) has the full scheme.
+
 ## Quick start
 
 Review the README and the per-platform instructions, then run the Windows installer and the WSL bootstrap in audit mode before installing anything. See [`docs/setup.md`](docs/setup.md) for the full order.

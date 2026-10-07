@@ -27,6 +27,8 @@ management repositories sat at the workspace root.
 - [x] **Layer plugin entries** — the org and personal layers now register skills through OpenCode plugin entries. `org-opencode` registers `service-integrations`; `personal-opencode` registers `dev-tools`. `maxstack` installs both into `.opencode\plugins`.
 - [x] **Docker integration** — Docker Engine 29.8.1, Compose v5.5.1, `hello-world`, and a `/mnt/d` bind mount all verified.
 - [x] **Local services integration (Infisical + Portainer CE + DbGate)** — running on the WSL Docker Engine; Infisical is the secret source. See [`planning.md`](planning.md).
+- [x] **Agent Vault.** The proxy brokers `discord` and `postman` requests for the `Agent-Vault-Runner` and `Human-Vault-Runner` identities, and the `with-secrets` and `with-vault` wrappers give one command shape. See [`secrets.md`](secrets.md).
+  - [ ] Same-user boundary stays open. The human and the agent share one Windows user, so the split is a convention with scoped identities, not an enforced boundary.
 
 ## Repository standard conformance
 

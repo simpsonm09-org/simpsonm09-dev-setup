@@ -14,6 +14,11 @@ auth.json
 credentials.json
 token.json
 
+# Agent Vault wrapper config (the real files live outside the repo, at
+# ~/.config/agent-vault/; these names are a defensive stop)
+agent-vault.env
+human.env
+
 # OS/editor noise
 Thumbs.db
 Desktop.ini
