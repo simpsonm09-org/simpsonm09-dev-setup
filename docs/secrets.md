@@ -20,7 +20,7 @@ The `dev` environment holds two folders. A value is a credential or it is not.
 
 | Folder | Holds | Examples |
 | --- | --- | --- |
-| `/secrets` | credentials | `POSTMAN_API_KEY`, `DISCORD_BOT_TOKEN`, `VAULT_TOKEN` |
+| `/secrets` | credentials | `POSTMAN_API_KEY`, `DISCORD_BOT_TOKEN` |
 | `/pii` | PII and person or machine config | `JIRA_SITE`, `GMAIL_ADDRESS`, `SMS_GATEWAY_HOST` |
 
 `/secrets` is a value that grants access. `/pii` is a value that describes a
@@ -36,7 +36,6 @@ though it is not a credential.
 | `GMAIL_APP_PASSWORD` | `himalaya` |
 | `NTFY_TOPIC`, `NTFY_TOKEN` | `ntfy` |
 | `SMS_GATEWAY_USER`, `SMS_GATEWAY_PASSWORD` | `smsgate` |
-| `VAULT_TOKEN` | `vault` |
 | `JENKINS_API_TOKEN` | the Jenkins CLI |
 | `JIRA_API_TOKEN` | `acli` |
 
@@ -44,7 +43,6 @@ though it is not a credential.
 
 | Key | Used by |
 | --- | --- |
-| `VAULT_ADDR`, `VAULT_NAMESPACE` | `vault` |
 | `JIRA_SITE`, `JIRA_PROJECT` | `acli` |
 | `JENKINS_URL`, `JENKINS_USER` | the Jenkins CLI |
 | `POSTMAN_WORKSPACE` | `postman` |

@@ -329,25 +329,6 @@
       }
     },
     {
-      "id": "vault",
-      "name": "HashiCorp Vault",
-      "role": "Vault secrets",
-      "kind": "cli",
-      "consumers": [
-        "human",
-        "agent"
-      ],
-      "policy": "latest",
-      "windows": {
-        "manager": "winget",
-        "id": "Hashicorp.Vault"
-      },
-      "macos": {
-        "manager": "brew",
-        "formula": "vault"
-      }
-    },
-    {
       "id": "kustomize",
       "name": "Kustomize",
       "role": "Kubernetes manifest rendering",

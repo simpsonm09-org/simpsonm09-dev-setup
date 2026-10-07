@@ -103,15 +103,6 @@
     "versionPolicy": "latest"
   },
   {
-    "name": "HashiCorp Vault",
-    "id": "Hashicorp.Vault",
-    "source": "winget",
-    "role": "Vault secrets",
-    "installByDefault": true,
-    "version": null,
-    "versionPolicy": "latest"
-  },
-  {
     "name": "Kustomize",
     "id": "Kubernetes.kustomize",
     "source": "winget",
