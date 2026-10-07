@@ -68,3 +68,35 @@ Organization-wide rulesets and the org protection audit need the `admin:org` sco
 ```bash
 gh auth refresh -h github.com -s admin:org
 ```
+
+## 6. Enroll the Agent Vault proxy and create the identities
+
+Done on this machine. On a new machine:
+
+1. Enroll the proxy once. The enrollment token is spent after the first start,
+   so keep it off the process arguments and off any committed file.
+
+   ```bash
+   infisical agent-vault proxy --domain http://localhost:8088 --port 17323 \
+     --enrollment-token <token>
+   ```
+
+   The systemd user unit `~/.config/systemd/user/agent-vault-proxy.service` then
+   starts the proxy without the token and restarts it on failure. Enable linger
+   so it survives logout.
+
+2. In the Infisical UI, create two machine identities in Agent Vault with
+   Universal Auth, one per role: `Agent-Vault-Runner` and `Human-Vault-Runner`.
+   Neither belongs to a project, because Agent Vault rejects an identity that
+   already belongs to another project.
+
+3. Grant both identities the `discord` and `postman` bundles.
+
+4. Write the role configs at mode `0600`: `~/.config/agent-vault/env` for the
+   agent and `~/.config/agent-vault/human.env` for the human. Each holds the
+   proxy address, the vault identity client id, and the client secret.
+
+5. Install the wrappers from `scripts/agent-vault/`: `with-vault` and
+   `with-secrets` to `~/.local/bin`, and `with-vault.ps1`, `with-secrets.ps1`,
+   and `shim/sitecustomize.py` under the Windows config directory. See
+   [`secrets.md`](secrets.md).

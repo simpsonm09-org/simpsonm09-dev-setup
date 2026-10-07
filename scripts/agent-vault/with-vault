@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# platforms: linux
+# Run a tool through the Infisical Agent Vault proxy under a named role.
+# The proxy attaches the real credential on the wire and it never enters this
+# process. Only a placeholder token is placed in the environment.
+#
+#   with-vault --role agent discli server list
+#   with-vault --role human postman workspace list
+#   with-vault --role agent --bundle other mytool arg
+#
+# --role is required, so a run is never silently misattributed. The role picks
+# the config file and the identity:
+#   human  ~/.config/agent-vault/human.env  Human-Vault-Runner
+#   agent  ~/.config/agent-vault/env        Agent-Vault-Runner
+set -euo pipefail
+
+usage() {
+  cat >&2 <<'EOF'
+usage: with-vault --role <human|agent> [--bundle <name>] <tool> [args...]
+
+  --role human    read ~/.config/agent-vault/human.env (Human-Vault-Runner)
+  --role agent    read ~/.config/agent-vault/env (Agent-Vault-Runner)
+  --bundle NAME   override the bundle for the tool
+
+  discli maps to the discord bundle, postman to the postman bundle.
+EOF
+  exit 2
+}
+
+role=""
+bundle=""
+args=()
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --role) role="${2:-}"; shift 2 ;;
+    --role=*) role="${1#*=}"; shift ;;
+    --bundle) bundle="${2:-}"; shift 2 ;;
+    --bundle=*) bundle="${1#*=}"; shift ;;
+    --) shift; args+=("$@"); break ;;
+    *) args+=("$1"); shift ;;
+  esac
+done
+
+case "$role" in
+  human) config="$HOME/.config/agent-vault/human.env" ;;
+  agent) config="$HOME/.config/agent-vault/env" ;;
+  *) printf 'with-vault: --role must be human or agent\n' >&2; usage ;;
+esac
+
+[ "${#args[@]}" -gt 0 ] || usage
+tool="${args[0]}"
+tool_args=("${args[@]:1}")
+
+# Map the tool to its bundle; --bundle overrides.
+if [ -z "$bundle" ]; then
+  case "$tool" in
+    discli) bundle="discord" ;;
+    postman) bundle="postman" ;;
+    *) printf 'with-vault: no bundle for %s; pass --bundle <name>\n' "$tool" >&2; exit 2 ;;
+  esac
+fi
+
+[ -r "$config" ] || { printf 'with-vault: cannot read %s\n' "$config" >&2; exit 1; }
+
+set -a
+# shellcheck disable=SC1090
+source "$config"
+set +a
+
+# The proxy attaches the real credential on the wire, so the token is a placeholder.
+case "$tool" in
+  discli)
+    export PYTHONPATH="$HOME/.config/agent-vault/shim${PYTHONPATH:+:$PYTHONPATH}"
+    export DISCORD_BOT_TOKEN="__agent_vault_placeholder__"
+    ;;
+  postman)
+    export POSTMAN_API_KEY="__agent_vault_placeholder__"
+    ;;
+esac
+
+exec infisical agent-vault run \
+  --access-bundle "$bundle" \
+  --proxy "$INFISICAL_AGENT_VAULT_PROXY_ADDRESS" \
+  --client-id "$INFISICAL_AGENT_VAULT_CLIENT_ID" \
+  --client-secret "$INFISICAL_AGENT_VAULT_CLIENT_SECRET" \
+  -- "$tool" "${tool_args[@]}"
