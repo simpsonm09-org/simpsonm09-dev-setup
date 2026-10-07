@@ -52,7 +52,7 @@ repository.
 
 Infer from the tool when it already knows the value, such as the GitHub account
 from `gh auth status` or the Kubernetes context from `kubectl config
-current-context`. Put a credential in `/secrets` and a PII or machine value in
+current-context`. Put a credential in `/secrets` and a PII or machine identity in
 `/pii`. Use the `settings/.env` offline fallback only for a value you need while
 Infisical is unreachable.
 
@@ -160,7 +160,7 @@ Done on this machine. On a new machine, do it once, in the Infisical UI:
 1. Open the project's `dev` environment.
 2. Create a folder `/secrets` and a folder `/pii`.
 3. Move each credential from the environment root into `/secrets`, and each PII
-   or machine value into `/pii`, using the tables above.
+   or machine identity into `/pii`, using the tables above.
 4. Rerun the loader for each runtime so the environment picks up the change.
 
 Until this step is done, the `/secrets` and `/pii` exports return nothing and
