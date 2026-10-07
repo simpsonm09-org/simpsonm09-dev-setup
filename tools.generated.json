@@ -394,45 +394,6 @@
       }
     },
     {
-      "id": "acli",
-      "name": "Atlassian CLI",
-      "role": "Jira and Atlassian",
-      "kind": "cli",
-      "consumers": [
-        "human",
-        "agent"
-      ],
-      "policy": "latest",
-      "windows": {
-        "manager": "manual",
-        "url": "https://developer.atlassian.com/cloud/acli/"
-      },
-      "macos": {
-        "manager": "manual",
-        "url": "https://developer.atlassian.com/cloud/acli/"
-      }
-    },
-    {
-      "id": "jenkins-cli",
-      "name": "Jenkins CLI",
-      "role": "Jenkins jobs and builds",
-      "kind": "cli",
-      "consumers": [
-        "human",
-        "agent"
-      ],
-      "policy": "latest",
-      "note": "Download the controller jar from <url>/jnlpJars/jenkins-cli.jar.",
-      "windows": {
-        "manager": "manual",
-        "url": "https://www.jenkins.io/doc/book/managing/cli/"
-      },
-      "macos": {
-        "manager": "manual",
-        "url": "https://www.jenkins.io/doc/book/managing/cli/"
-      }
-    },
-    {
       "id": "just",
       "name": "just",
       "role": "Repository tasks",

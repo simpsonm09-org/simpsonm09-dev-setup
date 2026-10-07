@@ -26,8 +26,6 @@ The full list, both human and agent, is in [`apps.md`](apps.md).
 | Kustomize | Kubernetes manifest rendering | windows: winget `Kubernetes.kustomize`; macos: brew `kustomize` |
 | Postman CLI | Postman cloud | windows: npm `postman-cli`; wsl: npm `postman-cli`; macos: npm `postman-cli` |
 | Newman | Postman collection runs | windows: npm `newman`; wsl: npm `newman`; macos: npm `newman` |
-| Atlassian CLI | Jira and Atlassian | windows: manual (https://developer.atlassian.com/cloud/acli/); macos: manual (https://developer.atlassian.com/cloud/acli/) |
-| Jenkins CLI | Jenkins jobs and builds | windows: manual (https://www.jenkins.io/doc/book/managing/cli/); macos: manual (https://www.jenkins.io/doc/book/managing/cli/) |
 | just | Repository tasks | windows: manual; macos: manual |
 | Himalaya | Send from the Gmail mailbox | windows: scoop `himalaya`; macos: brew `himalaya` |
 | ntfy | Phone notifications | windows: scoop `ntfy`; macos: brew `ntfy` |
