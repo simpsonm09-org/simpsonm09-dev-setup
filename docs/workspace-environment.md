@@ -34,7 +34,7 @@ This writes `docs/workspace-environment.snapshot.json`. The script reads only th
 
 ### Secrets
 
-Integration secrets come from self-hosted Infisical at `http://localhost:8088` and are pulled per runtime. WSL loads them through the workspace `.envrc` with direnv; Windows OpenChamber loads them through `scripts/Import-Secrets.ps1 -Apply`. The bootstrap file is `projects/repos/simpsonm09-dev-setup/settings/.env`. See [`../../simpsonm09-dev-setup/docs/secrets.md`](../../simpsonm09-dev-setup/docs/secrets.md).
+Integration secrets come from self-hosted Infisical at `http://localhost:8088` and are pulled per runtime. The `dev` environment holds two folders: `/secrets` for credentials, and `/pii` for PII and person or machine config. The bootstrap file `settings/.env` holds only the machine identity that unlocks the project plus a small offline fallback, and it is gitignored. WSL loads the folders through the workspace `.envrc` with direnv; Windows OpenChamber loads them through `scripts/Import-Secrets.ps1 -Apply`. See [`secrets.md`](secrets.md).
 
 ### Runtime tools
 

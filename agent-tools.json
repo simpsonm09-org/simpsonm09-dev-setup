@@ -47,6 +47,17 @@
       }
     },
     {
+      "id": "docker",
+      "name": "Docker Desktop",
+      "role": "Linux containers through WSL2",
+      "kind": "app",
+      "install": {
+        "windows": "winget `Docker.DockerDesktop`",
+        "wsl": "apt `docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin`",
+        "macos": "cask `docker-desktop`"
+      }
+    },
+    {
       "id": "gh",
       "name": "GitHub CLI",
       "role": "CLI-only GitHub tasks",
