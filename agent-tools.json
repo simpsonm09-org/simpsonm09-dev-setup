@@ -121,26 +121,6 @@
       }
     },
     {
-      "id": "acli",
-      "name": "Atlassian CLI",
-      "role": "Jira and Atlassian",
-      "kind": "cli",
-      "install": {
-        "windows": "manual (https://developer.atlassian.com/cloud/acli/)",
-        "macos": "manual (https://developer.atlassian.com/cloud/acli/)"
-      }
-    },
-    {
-      "id": "jenkins-cli",
-      "name": "Jenkins CLI",
-      "role": "Jenkins jobs and builds",
-      "kind": "cli",
-      "install": {
-        "windows": "manual (https://www.jenkins.io/doc/book/managing/cli/)",
-        "macos": "manual (https://www.jenkins.io/doc/book/managing/cli/)"
-      }
-    },
-    {
       "id": "just",
       "name": "just",
       "role": "Repository tasks",

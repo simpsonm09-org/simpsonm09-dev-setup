@@ -21,7 +21,7 @@ The `dev` environment holds two folders. A value is a credential or it is not.
 | Folder | Holds | Examples |
 | --- | --- | --- |
 | `/secrets` | credentials | `POSTMAN_API_KEY`, `DISCORD_BOT_TOKEN` |
-| `/pii` | PII and person or machine config | `JIRA_SITE`, `GMAIL_ADDRESS`, `SMS_GATEWAY_HOST` |
+| `/pii` | PII and person or machine config | `GMAIL_ADDRESS`, `SMS_GATEWAY_HOST` |
 
 `/secrets` is a value that grants access. `/pii` is a value that describes a
 person or a machine and would be a privacy leak in a public repository even
@@ -36,15 +36,11 @@ though it is not a credential.
 | `GMAIL_APP_PASSWORD` | `himalaya` |
 | `NTFY_TOPIC`, `NTFY_TOKEN` | `ntfy` |
 | `SMS_GATEWAY_USER`, `SMS_GATEWAY_PASSWORD` | `smsgate` |
-| `JENKINS_API_TOKEN` | the Jenkins CLI |
-| `JIRA_API_TOKEN` | `acli` |
 
 ### PII and config: `/pii`
 
 | Key | Used by |
 | --- | --- |
-| `JIRA_SITE`, `JIRA_PROJECT` | `acli` |
-| `JENKINS_URL`, `JENKINS_USER` | the Jenkins CLI |
 | `POSTMAN_WORKSPACE` | `postman` |
 | `GMAIL_ADDRESS` | `himalaya` |
 | `SMS_GATEWAY_HOST` | `smsgate` |
