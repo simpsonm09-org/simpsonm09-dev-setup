@@ -1,4 +1,4 @@
-# dev-setup-starter
+# simpsonm09-dev-setup
 
 Repeatable workstation setup for the Windows 10 laptop and Windows 11 desktop, with Ubuntu on WSL2. This repository owns general workstation tools and setup documentation; AI prompts, agents, and shared AI workflows belong in [`maxstack`](https://github.com/simpsonm09-org/simpsonm09-maxstack).
 

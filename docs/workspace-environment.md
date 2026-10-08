@@ -4,8 +4,8 @@ This document records the machine-level state outside the repositories that affe
 
 ## Ownership
 
-- `maxstack` owns AI configuration: the PStack plugin, the per-role agent models, the MCP servers, and the workspace `opencode.jsonc`. It installs that bundle into `D:\dev\simpsonm09` only.
-- `dev-setup-starter` owns machine and app snapshots plus non-AI dev tooling, including this document and the snapshot script.
+- `maxstack` owns AI configuration: the PStack plugin, the agent profiles, the MCP servers, and the workspace `opencode.jsonc`. It installs that bundle into `D:\dev\simpsonm09` only. Neither `maxstack` nor this repository sets a model for OpenCode or Claude Code.
+- `simpsonm09-dev-setup` owns machine and app snapshots plus non-AI dev tooling, including this document and the snapshot script.
 - `D:\dev\simpsonm09` is the generated workspace. Its root files (`opencode.jsonc`, `.opencode`) are written by `maxstack`.
 
 ## Refresh the snapshot
@@ -20,7 +20,7 @@ This writes `docs/workspace-environment.snapshot.json`. The script reads only th
 
 ### OpenCode runtime
 
-- Windows global config: `%USERPROFILE%\.config\opencode\opencode.jsonc` or `opencode.json`. It must not set a model; the workspace config supplies `opencode-go/deepseek-v4.1-flash`. The structural verifier fails if a global model is present.
+- Windows global config: `%USERPROFILE%\.config\opencode\opencode.jsonc` or `opencode.json`. The global config belongs to you. This repository does not manage it and does not require it to be empty. Pick the model in the harness: the model picker in T3 Code, or your own OpenCode settings.
 - Windows global skills: `%USERPROFILE%\.agents\skills`. It must not contain PStack; the global install was removed.
 - Windows global agents: `%USERPROFILE%\.config\opencode\agents`. It must not contain `pstack-*` profiles.
 - WSL equivalents: `~/.config/opencode/` and `~/.agents/skills`. The WSL CLI reads the same workspace files through `/mnt/d/dev/simpsonm09`.

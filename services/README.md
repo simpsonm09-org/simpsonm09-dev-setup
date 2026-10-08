@@ -1,6 +1,6 @@
 # Running the local infrastructure services
 
-`dev-setup-starter` owns the local services that back development. All run as containers on the Docker Engine inside Ubuntu WSL2.
+`simpsonm09-dev-setup` owns the local services that back development. All run as containers on the Docker Engine inside Ubuntu WSL2.
 
 | Service | Role | Address |
 | --- | --- | --- |

@@ -40,7 +40,7 @@ Draft order. Each step ends with a check, and the order can change once the deci
 1. Install Windows 10 on an account dedicated to the machine. Apply drivers and Windows Update.
 2. Keep a small `C:` for the OS and updates. Put data on `D:` and use the layout in [project-workflow](../project-workflow.md).
 3. Install WSL2 with one Ubuntu distribution. Move the VHDX to `D:` before installing Docker. See [hardware setup options](README.md).
-4. Run the WSL bootstrap from `dev-setup-starter` in audit mode, then run it with `--install`. Verify `hello-world` and a `D:` bind mount.
+4. Run the WSL bootstrap from `simpsonm09-dev-setup` in audit mode, then run it with `--install`. Verify `hello-world` and a `D:` bind mount.
 5. Add Defender exclusions from an elevated shell. See [wsl-performance](../wsl-performance.md).
 6. Start the Compose services under [services](../../services/README.md). Load secrets with `Import-Secrets.ps1`.
 7. Configure remote access. Restrict it to the local network or a VPN, and turn off password authentication for SSH.

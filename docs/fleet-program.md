@@ -26,11 +26,11 @@ CI. No repository audits another, and there is no organization-wide audit.
 | Roster and tier policy | `repo-catalog` |
 | Shared CI, linting, security, governance, and the conformance checker | `repo-standard` |
 | Reference implementation of the standard | `repo-template` |
-| Workspace composition, model policy, and the installer | `maxstack` |
+| Workspace composition and the installer (sets no model) | `maxstack` |
 | Organization plugin layer for OpenCode and Claude Code, including the integration registry | `org-ai-plugin` |
 | Personal plugin layer for OpenCode and Claude Code | `personal-ai-plugin` |
 | PStack plugin layer | `pstack-opencode-plugin` |
-| Workstation setup, secrets loaders, and this record | `dev-setup-starter` |
+| Workstation setup, secrets loaders, and this record | `simpsonm09-dev-setup` |
 
 ## Programs
 
@@ -74,7 +74,7 @@ OpenChamber, a desktop app that hosted an OpenCode server and its UI, was uninst
 ### Cross-platform tooling (queued)
 
 Every repository should run on Windows and macOS. The plan is one declared source of truth
-for provisioned tools (`dev-setup-starter/tools.yaml`) and an `ops.json` operation manifest
+for provisioned tools (`simpsonm09-dev-setup/tools.yaml`) and an `ops.json` operation manifest
 per repository, with `repo-standard/scripts/op.mjs` as the dispatcher and `just` as the one
 entry point. Portable-first is the base, with bash and PowerShell twins only as a declared
 exception. The design is queued behind the standard work in
