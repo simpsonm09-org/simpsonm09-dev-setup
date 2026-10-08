@@ -27,7 +27,7 @@ Replace `example`, branch, and base branch with the project-specific values. Nev
 
 ## The workspace
 
-The workspace is the tree rooted at the directory that owns the generated `opencode.jsonc` and the `.opencode/plugins` directory. That root is `D:\dev\simpsonm09`. Every repository beneath it inherits the model, the agents, and the skills, because OpenCode merges the configuration of each ancestor directory. A feature project therefore needs no per-project setup.
+The workspace is the tree rooted at the directory that owns the generated `opencode.jsonc` and the `.opencode/plugins` directory. That root is `D:\dev\simpsonm09`. Every repository beneath it inherits the agents and the skills, because OpenCode merges the configuration of each ancestor directory. The workspace sets no model, so each user picks the model in the harness. A feature project therefore needs no per-project setup.
 
 The `.envrc` at that root is the secret-loading boundary. direnv walks up from the current directory to the root and loads the workspace `.envrc`, which pulls the values from Infisical into the shell for every repository under the root. See [`secrets.md`](secrets.md).
 

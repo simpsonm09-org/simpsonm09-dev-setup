@@ -16,7 +16,7 @@ Do not commit full AppData/profile folders, auth stores, cookies, histories, ses
 | Google Chrome | No profile snapshot | Profile was not inspected; exclude cookies, passwords, history, and signed-in state. Keep auto-updates enabled. |
 | OneNote | No repo snapshot; rely on OneNote account sync | Notebooks and personal notes |
 | GitHub Desktop | No repo snapshot needed; repositories are listed in GitHub | Login tokens, credential stores, app databases |
-| OpenCode | `maxstack` owns the OpenCode plugin, agent profiles, and the workspace bundle that sets the default model, agent, and permissions under `D:\dev\simpsonm09`. This repository does not apply OpenCode configuration. | Auth store, API keys, session databases, and provider-specific account state |
+| OpenCode | `maxstack` owns the OpenCode plugin, agent profiles, and the workspace bundle that sets the default agent and permissions under `D:\dev\simpsonm09`. Neither this repository nor `maxstack` sets a model; you pick it in the harness. This repository does not apply OpenCode configuration. | Auth store, API keys, session databases, and provider-specific account state |
 | Docker Engine | Default daemon configuration only | Images, caches, container state, and volume contents live inside the Ubuntu VHDX on D:. |
 
 ## Recommendations before tests
@@ -33,4 +33,4 @@ The safe portable baseline is Zed settings. OpenCode and PStack moved to `maxsta
 
 Machine state that affects the workspace, including the OpenCode and WSL runtime paths and whether the T3 Code app data folder exists, is captured observably by `scripts/Get-WorkspaceEnvironmentSnapshot.ps1` and `scripts/get-workspace-environment-snapshot.sh`. See [`workspace-environment.md`](workspace-environment.md).
 
-This repository does not read or write T3 Code's settings. The workspace bundle supplies `opencode-go/deepseek-v4.1-flash` and `build`, and a T3 session that runs inside the workspace uses them through OpenCode. Provider authentication stays local to each runtime. Review any network exposure, LAN access, tunnel, or auto-approve option in the T3 Settings screen directly; do not enable them as a workstation default. Never copy the T3 app data folder.
+This repository does not read or write T3 Code's settings. Neither this repository nor `maxstack` sets a model for OpenCode or Claude Code. The workspace bundle supplies the `build` agent, and you choose the model in the T3 Code model picker or in your own OpenCode or Claude Code settings. Provider authentication stays local to each runtime. Review any network exposure, LAN access, tunnel, or auto-approve option in the T3 Settings screen directly; do not enable them as a workstation default. Never copy the T3 app data folder.
