@@ -9,8 +9,8 @@ repo_paths=(
   simpsonm09-dev-setup
   simpsonm09-maxstack
   pstack-opencode-plugin
-  simpsonm09-org-opencode-plugin
-  simpsonm09-personal-opencode-plugin
+  simpsonm09-org-ai-plugin
+  simpsonm09-personal-ai-plugin
   simpsonm09-repo-standard
   simpsonm09-repo-template
 )
