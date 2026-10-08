@@ -27,8 +27,8 @@ CI. No repository audits another, and there is no organization-wide audit.
 | Shared CI, linting, security, governance, and the conformance checker | `repo-standard` |
 | Reference implementation of the standard | `repo-template` |
 | Workspace composition, model policy, and the installer | `maxstack` |
-| Organization OpenCode layer, including the integration registry | `org-opencode-plugin` |
-| Personal OpenCode layer | `personal-opencode-plugin` |
+| Organization plugin layer for OpenCode and Claude Code, including the integration registry | `org-ai-plugin` |
+| Personal plugin layer for OpenCode and Claude Code | `personal-ai-plugin` |
 | PStack plugin layer | `pstack-opencode-plugin` |
 | Workstation setup, secrets loaders, and this record | `dev-setup-starter` |
 
@@ -51,7 +51,7 @@ code` plus the local `grep` tool replaced `grep.app`. The org and personal layer
 contribute no MCP server, so the workspace default set is empty. Three MCP-only jobs stay
 documented and uninstalled: DebugMCP for stepping, Stagehand or Browserbase for
 natural-language browser control, and the chrome-devtools MCP for its excluded commands.
-The registry lives in `org-opencode-plugin/skills/service-integrations/SKILL.md`.
+The registry lives in `org-ai-plugin/skills/service-integrations/SKILL.md`.
 
 ### Secrets and integrations
 
