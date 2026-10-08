@@ -10,7 +10,7 @@ This repository and `maxstack` are the source of truth for the shared workstatio
 
 The requested root is `D:\dev\simpsonm09`, which WSL sees at `/mnt/d/dev/simpsonm09`. Scripts verify the drive before making changes. If a device has no `D:` drive, stop and ask the user for the path; do not choose a fallback automatically.
 
-Both machines run Docker Engine inside Ubuntu WSL, and GitHub CLI is authenticated in WSL. The shared OpenCode and PStack workspace bundle is installed into `D:\dev\simpsonm09` by `maxstack`. Shared tool settings live under `settings/windows/` for Zed, Noctty, and OpenChamber.
+Both machines run Docker Engine inside Ubuntu WSL, and GitHub CLI is authenticated in WSL. The shared OpenCode and PStack workspace bundle is installed into `D:\dev\simpsonm09` by `maxstack`. Shared tool settings live under `settings/windows/` for Zed and Noctty. The desktop app for coding agents is T3 Code, which drives Claude Code and OpenCode; see [`docs/app-settings.md`](docs/app-settings.md).
 
 ## Secrets and the Agent Vault
 

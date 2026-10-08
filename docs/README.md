@@ -8,7 +8,7 @@ Index for this repository.
 - [Setup](setup.md) is the safe setup order.
 - [Apps and roles](apps.md) lists the workstation apps and the install-source policy; it is generated from `tools.yaml`.
 - [Agent tools](agent-tools.md) lists the tools whose `consumers` list names `agent`; it is generated from `tools.yaml`.
-- [Application settings](app-settings.md) inventories Zed, Noctty, and OpenChamber.
+- [Application settings](app-settings.md) inventories Zed, Noctty, and T3 Code.
 - [Secrets](secrets.md) covers the secrets manager setup.
 - [Workspace environment](workspace-environment.md) records the machine and app state around the workspace.
 - [WSL performance](wsl-performance.md) measures cross-filesystem I/O.

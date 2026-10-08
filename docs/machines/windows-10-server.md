@@ -62,7 +62,7 @@ Draft order. Each step ends with a check, and the order can change once the deci
 
 - The interactive app list in [windows/apps.json](../../windows/apps.json).
 - The portable editor and terminal settings under `settings/windows/`.
-- The OpenChamber desktop app.
+- The T3 Code desktop app.
 - The developer Git identity and personal signing key.
 
 ## Deferred

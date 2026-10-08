@@ -81,10 +81,13 @@ from a file, so each runtime needs a loader.
   --path /secrets` and `--path /pii` to pull the values into the shell. For a
   shell without direnv, source `wsl/load-secrets.sh`, or reach one command with
   `with-secrets <tool>`, which loads the same values into that command only.
-- **Windows OpenChamber** runs the OpenCode server as a Windows process, which
-  direnv cannot reach. `scripts/Import-Secrets.ps1` reads `settings/.env`, pulls
-  the same two folders from Infisical, and sets them as Windows user environment
-  variables. Restart OpenChamber so its server inherits them. For one command,
+- **Windows T3 Code** starts an OpenCode server for each session as a Windows
+  process, which direnv cannot reach. That server inherits the environment T3
+  Code was launched with. `scripts/Import-Secrets.ps1` reads `settings/.env`,
+  pulls the same two folders from Infisical, and sets them as Windows user
+  environment variables. Restart T3 Code so new sessions inherit them. A value
+  needed by one provider only can instead go in that provider instance's
+  environment variables in the T3 Settings screen. For one command,
   `with-secrets.ps1 <tool>` loads the same values into that process only.
 - **Discord and Postman for the agent** do not use the loader at all. They go
   through the Agent Vault, described next.
@@ -175,7 +178,7 @@ pwsh -File scripts\Import-Secrets.ps1           # audit: lists keys, not values
 pwsh -File scripts\Import-Secrets.ps1 -Apply    # set the user environment variables
 ```
 
-Then restart OpenChamber.
+Then restart T3 Code.
 
 ## Apply in WSL
 

@@ -6,7 +6,8 @@ param(
 )
 
 # Resolves the integration values and sets them as Windows user environment
-# variables, so OpenChamber's server inherits them on restart. The bootstrap
+# variables, so the OpenCode server that T3 Code starts for each session inherits
+# them after T3 Code restarts. The bootstrap
 # file at Path holds the Infisical machine identity and an offline fallback.
 # The values come from the /secrets and /pii folders of the Infisical project
 # and fall back to the file's own values when it is unreachable. Values are
@@ -125,4 +126,4 @@ foreach ($key in $secrets.Keys) {
     [Environment]::SetEnvironmentVariable($key, $secrets[$key], 'User')
 }
 Write-Host ''
-Write-Host "Set $($secrets.Count) user environment variable(s). Restart OpenChamber so its server inherits them."
+Write-Host "Set $($secrets.Count) user environment variable(s). Restart T3 Code so the agent sessions it starts inherit them."

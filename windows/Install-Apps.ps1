@@ -92,7 +92,7 @@ $inventory | ForEach-Object {
     $state = if ($_.Installed) { 'present' } else { 'not detected' }
     Write-Host " - $($_.App): $state [$($_.Id), source=$($_.Source)]"
 }
-Write-Host 'Noctty uses the legacy winget ID when missing; the existing standalone app is detected by name. OpenChamber uses its official release installer; see windows/README.md.'
+Write-Host 'Noctty uses the legacy winget ID when missing; the existing standalone app is detected by name.'
 Write-Host 'This script does not export/import personal app data or authenticate accounts.'
 
 if (-not $Install) {

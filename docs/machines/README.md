@@ -32,7 +32,7 @@ The Windows mount is reached over a 9p boundary. The boundary cost dominates sma
 
 1. Shared source, Windows-side work, and cross-runtime sharing stay on the Windows workspace drive.
 2. Linux-heavy I/O stays in ext4: clones and worktrees you operate from Linux, `node_modules`, build output, test temp dirs, Docker build contexts, and package caches.
-3. Run each tool on the side that owns the files: Node and TypeScript builds and Docker builds belong in ext4, Windows OpenChamber work belongs on the workspace drive.
+3. Run each tool on the side that owns the files: Node and TypeScript builds and Docker builds belong in ext4, Windows T3 Code work belongs on the workspace drive.
 4. Never put `node_modules` or a build tree on a Windows mount.
 
 ## What changes between the options
@@ -44,7 +44,7 @@ The Windows mount is reached over a 9p boundary. The boundary cost dominates sma
 
 - WSL2 with Ubuntu and systemd, one distribution per machine.
 - The workspace at the Windows workspace drive with clones under `projects\repos` and worktrees under `projects\worktrees`.
-- OpenCode CLI in WSL and OpenChamber on Windows; Docker Engine inside WSL.
+- OpenCode CLI in WSL and T3 Code on Windows; Docker Engine inside WSL.
 - The shared tool settings from `settings/windows/` and the `maxstack` workspace bundle.
 - The rule that keeps `node_modules`, build output, Docker contexts, and test temp dirs in ext4.
 

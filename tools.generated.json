@@ -245,20 +245,18 @@
       }
     },
     {
-      "id": "openchamber",
-      "name": "OpenChamber",
-      "role": "OpenCode GUI",
+      "id": "t3-code",
+      "name": "T3 Code",
+      "role": "Desktop GUI for coding agents (Claude Code and OpenCode providers)",
       "kind": "app",
       "consumers": [
         "human"
       ],
-      "note": "No matching winget package; install and update from the official release.",
+      "policy": "latest",
+      "note": "Provider instances are configured in the app; update with winget upgrade T3Tools.T3Code.",
       "windows": {
-        "manager": "manual",
-        "publisher": "OpenChamber",
-        "url": "https://github.com/openchamber/openchamber/releases",
-        "observedVersion": "2.0.2",
-        "installPolicy": "manual-official-release"
+        "manager": "winget",
+        "id": "T3Tools.T3Code"
       }
     },
     {
@@ -498,6 +496,24 @@
         "note": "Install from the official V2 command; credentials stay in local auth storage.",
         "observedVersion": "2.0.18",
         "updateCommand": "opencode upgrade"
+      }
+    },
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "role": "AI CLI (Claude provider for T3 Code)",
+      "kind": "cli",
+      "consumers": [
+        "human",
+        "agent"
+      ],
+      "policy": "latest",
+      "note": "Installed separately from the package bootstrap as the npm global @anthropic-ai/claude-code; credentials stay in local auth storage.",
+      "windows": {
+        "manager": "manual",
+        "publisher": "Anthropic",
+        "url": "https://code.claude.com/docs/en/setup",
+        "installPolicy": "manual-official-release"
       }
     },
     {

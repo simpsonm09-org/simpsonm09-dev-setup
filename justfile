@@ -68,10 +68,6 @@ install-apps *args:
 apply-noctty *args:
     node scripts/setup-ops.mjs apply-noctty {{args}}
 
-# Preview or apply OpenChamber app settings through its local API (pass -Apply to write).
-apply-openchamber *args:
-    node scripts/setup-ops.mjs apply-openchamber {{args}}
-
 # Preview or add Defender exclusions for the workspace and WSL dir (pass -Apply from an elevated shell).
 add-defender-exclusions *args:
     node scripts/setup-ops.mjs add-defender-exclusions {{args}}

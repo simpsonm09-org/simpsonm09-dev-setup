@@ -19,12 +19,6 @@
       "description": "Preview or apply the shared Noctty (Ghostty) config (pass -Apply to write)."
     },
     {
-      "id": "apply-openchamber",
-      "platforms": ["windows"],
-      "windows": "scripts/Apply-OpenChamberSettings.ps1",
-      "description": "Preview or apply OpenChamber app settings through its local API (pass -Apply to write)."
-    },
-    {
       "id": "add-defender-exclusions",
       "platforms": ["windows"],
       "windows": "scripts/Add-DefenderExclusions.ps1",
