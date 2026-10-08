@@ -4,14 +4,15 @@ param(
     [string] $Workspace = 'D:\dev\simpsonm09',
     [string] $OpenCodeConfigDir = (Join-Path $env:USERPROFILE '.config\opencode'),
     [string] $GlobalSkillsDir = (Join-Path $env:USERPROFILE '.agents\skills'),
-    [string] $OpenChamberConfigDir = (Join-Path $env:USERPROFILE '.config\openchamber'),
+    [string] $T3UserDataDir = (Join-Path $env:USERPROFILE '.t3\userdata'),
     [string] $OutputPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'docs\workspace-environment.snapshot.json'),
     [switch] $Write
 )
 
 # Collects only the allowlisted machine state that affects work in the workspace.
-# It never reads OpenChamber relay keys, provider auth, sessions, or permission
-# auto-accept state.
+# It never reads T3 Code settings, thread history, provider auth, or secrets. For
+# T3 it only checks that the userdata folder exists and reads the installed app
+# version from the Windows uninstall registry.
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -33,16 +34,22 @@ function Get-Prop($Object, [string] $Name) {
     return $null
 }
 
-function Get-List($Object, [string] $Name) {
-    $value = Get-Prop $Object $Name
-    if ($null -eq $value) { return , @() }
-    return , @($value)
-}
-
 function Get-ToolVersion([string] $Command) {
     $resolved = Get-Command $Command -ErrorAction SilentlyContinue
     if (-not $resolved) { return $null }
     try { return ((& $Command --version 2>&1 | Select-Object -First 1) -as [string]).Trim() } catch { return $null }
+}
+
+function Get-T3AppVersion {
+    $keys = @(
+        'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*'
+        'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*'
+        'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+    )
+    foreach ($entry in @(Get-ItemProperty -Path $keys -ErrorAction SilentlyContinue)) {
+        if ((Get-Prop $entry 'DisplayName') -like 'T3 Code*') { return (Get-Prop $entry 'DisplayVersion') }
+    }
+    return $null
 }
 
 function Test-ConfigMatch([string] $Shared, [string] $Target) {
@@ -64,61 +71,6 @@ foreach ($name in @('opencode.jsonc', 'opencode.json')) {
     }
 }
 
-$settingsPath = Join-Path $OpenChamberConfigDir 'settings.json'
-$settings = if (Test-Path -LiteralPath $settingsPath -PathType Leaf) {
-    Get-Content -LiteralPath $settingsPath -Raw | ConvertFrom-Json
-} else { $null }
-
-$project = $null
-foreach ($candidate in @(Get-Prop $settings 'projects')) {
-    if ((Get-Prop $candidate 'path') -eq $Workspace) { $project = $candidate; break }
-}
-$projectEntry = if ($project) {
-    [ordered]@{
-        path           = Get-Prop $project 'path'
-        label          = Get-Prop $project 'label'
-        defaultAgent   = Get-Prop $project 'defaultAgent'
-        defaultModel   = Get-Prop $project 'defaultModel'
-        defaultVariant = Get-Prop $project 'defaultVariant'
-    }
-} else { $null }
-
-$preferences = if ($settings) {
-    [ordered]@{
-        lightThemeId            = Get-Prop $settings 'lightThemeId'
-        darkThemeId             = Get-Prop $settings 'darkThemeId'
-        notifyOnSubtasks        = Get-Prop $settings 'notifyOnSubtasks'
-        notifyOnCompletion      = Get-Prop $settings 'notifyOnCompletion'
-        notifyOnError           = Get-Prop $settings 'notifyOnError'
-        notifyOnQuestion        = Get-Prop $settings 'notifyOnQuestion'
-        notificationTemplates   = Get-Prop $settings 'notificationTemplates'
-        favoriteModels          = Get-List $settings 'favoriteModels'
-        recentModels            = Get-List $settings 'recentModels'
-        recentEfforts           = Get-Prop $settings 'recentEfforts'
-        recentAgents            = Get-List $settings 'recentAgents'
-        hiddenModels            = Get-List $settings 'hiddenModels'
-        collapsedModelProviders = Get-List $settings 'collapsedModelProviders'
-        showDeletionDialog      = Get-Prop $settings 'showDeletionDialog'
-    }
-} else { $null }
-
-$ocAllowlist = @(
-    'nativeNotificationsEnabled', 'notifyOnCompletion', 'notifyOnError', 'notifyOnQuestion', 'notifyOnSubtasks',
-    'autoDeleteEnabled', 'autoDeleteAfterDays', 'sessionRetentionOnlyArchived', 'sessionRetentionAction',
-    'useSystemTheme', 'activityRenderMode', 'chatRenderMode', 'diffLayoutPreference', 'wideChatLayoutEnabled',
-    'collapsibleThinkingBlocks', 'showReasoningTraces', 'stickyUserHeader', 'autoSaveEnabled',
-    'defaultModel', 'defaultAgent', 'showDeletionDialog', 'smallModelUseDefault'
-)
-$ocEffective = [ordered]@{}
-if ($settings) { foreach ($prop in $settings.PSObject.Properties) { $ocEffective[$prop.Name] = $prop.Value } }
-$prefsPath = Join-Path $OpenChamberConfigDir 'preferences.json'
-if (Test-Path -LiteralPath $prefsPath -PathType Leaf) {
-    $prefsDoc = Get-Content -LiteralPath $prefsPath -Raw | ConvertFrom-Json
-    foreach ($field in $prefsDoc.fields.PSObject.Properties) { $ocEffective[$field.Name] = $field.Value.value }
-}
-$appliedSettings = [ordered]@{}
-foreach ($key in $ocAllowlist) { if ($ocEffective.Contains($key)) { $appliedSettings[$key] = $ocEffective[$key] } }
-
 $zedShared = Join-Path (Split-Path -Parent $PSScriptRoot) 'settings\windows\zed\settings.json'
 $nocttyShared = Join-Path (Split-Path -Parent $PSScriptRoot) 'settings\windows\noctty\config.ghostty'
 $tools = [ordered]@{
@@ -131,24 +83,6 @@ $tools = [ordered]@{
         shared        = $nocttyShared
         target        = Join-Path $env:LOCALAPPDATA 'noctty\config.ghostty'
         matchesShared = Test-ConfigMatch $nocttyShared (Join-Path $env:LOCALAPPDATA 'noctty\config.ghostty')
-    }
-    openchamber = [ordered]@{
-        desired = Join-Path (Split-Path -Parent $PSScriptRoot) 'settings\windows\openchamber\settings.desired.json'
-        api     = 'http://127.0.0.1:57123/api/config/settings'
-    }
-}
-
-$servers = @()
-$managedDir = Join-Path $OpenChamberConfigDir 'managed-opencode'
-foreach ($file in (Get-ChildItem -LiteralPath $managedDir -Filter '*.json' -ErrorAction SilentlyContinue)) {
-    try { $record = Get-Content -LiteralPath $file.FullName -Raw | ConvertFrom-Json -ErrorAction Stop } catch { continue }
-    $servers += [ordered]@{
-        pid       = Get-Prop $record 'pid'
-        port      = Get-Prop $record 'port'
-        runtime   = Get-Prop $record 'runtime'
-        startedAt = Get-Prop $record 'startedAt'
-        binary    = Get-Prop $record 'binary'
-        running   = [bool](Get-Process -Id (Get-Prop $record 'pid') -ErrorAction SilentlyContinue)
     }
 }
 
@@ -164,12 +98,10 @@ $snapshot = [ordered]@{
         globalAgents   = Get-Names (Join-Path $OpenCodeConfigDir 'agents')
         globalSkills   = Get-Names $GlobalSkillsDir
     }
-    openchamber = [ordered]@{
-        settingsPath   = $settingsPath
-        project        = $projectEntry
-        preferences    = $preferences
-        appliedSettings = $appliedSettings
-        managedServers = $servers
+    t3          = [ordered]@{
+        userDataPath    = $T3UserDataDir
+        userDataPresent = Test-Path -LiteralPath $T3UserDataDir -PathType Container
+        appVersion      = Get-T3AppVersion
     }
     runtimes    = [ordered]@{
         node            = Get-ToolVersion 'node'

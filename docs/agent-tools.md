@@ -31,6 +31,7 @@ The full list, both human and agent, is in [`apps.md`](apps.md).
 | ntfy | Phone notifications | windows: scoop `ntfy`; macos: brew `ntfy` |
 | SMS Gateway | Texting via an Android phone | windows: manual (https://github.com/capcom6/android-sms-gateway/releases); macos: manual (https://github.com/capcom6/android-sms-gateway/releases) |
 | OpenCode CLI | AI CLI | wsl: manual |
+| Claude Code | AI CLI (Claude provider for T3 Code) | windows: manual (https://code.claude.com/docs/en/setup) |
 | mise | Pinned tool versions | windows: winget `jdx.mise`; wsl: manual (https://mise.jdx.dev/installing-mise.html); macos: brew `mise` |
 | Infisical CLI | Workspace secrets source | windows: npm `@infisical/cli`; wsl: npm `@infisical/cli`; macos: npm `@infisical/cli` |
 | Trivy | Dependency, secret, and misconfig scan | windows: winget `AquaSecurity.Trivy`; wsl: manual (https://trivy.dev/latest/docs/installation/); macos: brew `trivy` |

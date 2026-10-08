@@ -1,6 +1,6 @@
 # Safe setup order
 
-PowerShell commands in these docs run on Windows with `pwsh` (PowerShell 7). From WSL, invoke them as `pwsh.exe -File 'D:\...'`. They resolve Windows paths and talk to the Windows OpenChamber API, so a Linux `pwsh` does not work, and Windows PowerShell 5.1 (`powershell.exe`) does not populate `$PSScriptRoot` for scripts that use it in parameter defaults.
+PowerShell commands in these docs run on Windows with `pwsh` (PowerShell 7). From WSL, invoke them as `pwsh.exe -File 'D:\...'`. They resolve Windows paths, so a Linux `pwsh` does not work, and Windows PowerShell 5.1 (`powershell.exe`) does not populate `$PSScriptRoot` for scripts that use it in parameter defaults.
 
 1. Review the README and the per-platform instructions.
 2. On each Windows device, run `windows/Install-Apps.ps1` in audit mode first. It verifies `D:` and inventories supported winget packages; it does not install anything unless `-Install` is supplied. The app data lives in [`tools.yaml`](../tools.yaml): `just tools` prints the plan, `just tools-apply` installs the Windows set and then reaches into WSL, and `just tools-check` fails when a generated artifact is stale.
@@ -10,5 +10,5 @@ PowerShell commands in these docs run on Windows with `pwsh` (PowerShell 7). Fro
 6. Clone the fleet into `projects/repos`. From this repository, `just workspace --apply` clones every repository in the `repo-catalog` roster and sets the `upstream` remote. The next step needs the `maxstack` and `pstack-opencode-plugin` checkouts.
 7. OpenCode and PStack configuration lives in `maxstack`. Install the workspace bundle with `maxstack/scripts/Install-Workspace.ps1 -Apply`, which writes the model, agent, permission, and plugin settings into the `D:\dev\simpsonm09` workspace only. This repository no longer owns OpenCode configuration.
 8. Set up the Agent Vault for brokered service access, after the workspace install. Enroll the proxy as the systemd user service `agent-vault-proxy`, create the `Agent-Vault-Runner` and `Human-Vault-Runner` identities with Universal Auth, grant both the `discord` and `postman` bundles, and write the role configs at mode `0600`. Install the wrappers from [`../scripts/agent-vault/`](../scripts/agent-vault/) to `~/.local/bin` and `C:\Users\<user>\.config\agent-vault`. See [`manual-steps.md`](manual-steps.md) and [`secrets.md`](secrets.md).
-9. Sign into GitHub Desktop, `gh`, OpenCode, OneNote, Postman, and OpenChamber locally as needed. Never paste credentials into this repository or commit them.
+9. Sign into GitHub Desktop, `gh`, Claude Code, OpenCode, OneNote, Postman, and T3 Code locally as needed. Never paste credentials into this repository or commit them.
 10. Create and verify one sample worktree and test Zed against a project on the D: mount before using this location for I/O-heavy container builds.

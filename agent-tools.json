@@ -170,6 +170,15 @@
       }
     },
     {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "role": "AI CLI (Claude provider for T3 Code)",
+      "kind": "cli",
+      "install": {
+        "windows": "manual (https://code.claude.com/docs/en/setup)"
+      }
+    },
+    {
       "id": "mise",
       "name": "mise",
       "role": "Pinned tool versions",

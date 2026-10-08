@@ -5,8 +5,8 @@
 # the Universal Auth machine identity. Reads the /secrets and /pii folders of
 # the dev environment and overlays both on the .env values. Falls back to the
 # .env values when Infisical is unreachable. This covers WSL CLI sessions. The
-# Windows OpenChamber server needs the same values applied as Windows user
-# environment variables via scripts/Import-Secrets.ps1.
+# Windows T3 Code app and the agent sessions it starts need the same values
+# applied as Windows user environment variables via scripts/Import-Secrets.ps1.
 set -a
 # shellcheck disable=SC1090
 source "${1:-/mnt/d/dev/simpsonm09/projects/repos/simpsonm09-dev-setup/settings/.env}"

@@ -35,13 +35,13 @@ The conclusion is the same for both classes. The `/mnt` path pays the 9p boundar
 
 ## Why this workspace still crosses filesystems
 
-The workspace lives on `D:` so the Windows OpenChamber app and the WSL OpenCode CLI read and write the same files. That sharing is the specific reason the guidance allows. The cost is that Linux-side heavy I/O against `/mnt/d` pays the boundary penalty.
+The workspace lives on `D:` so the Windows T3 Code app and the WSL OpenCode CLI read and write the same files. That sharing is the specific reason the guidance allows. The cost is that Linux-side heavy I/O against `/mnt/d` pays the boundary penalty.
 
 ## Rules
 
 1. Shared source, Windows-side work, and cross-runtime sharing stay on `D:`.
 2. Linux-heavy I/O stays in ext4. That covers clones and worktrees you operate from Linux, `node_modules`, build output, test temp dirs, Docker build contexts, and package caches.
-3. Run each tool on the side that owns the files. Node or TypeScript builds and Docker builds belong in ext4. Windows OpenChamber work belongs on `D:`.
+3. Run each tool on the side that owns the files. Node or TypeScript builds and Docker builds belong in ext4. Windows T3 Code work belongs on `D:`.
 4. Never put `node_modules` or a build tree on `/mnt`.
 
 ## The ext4 working area
@@ -62,7 +62,7 @@ Do not run `npm install`, `docker build`, or test loops against `/mnt/d`.
 - **Git.** Run `git status`, `fetch`, `add`, and `commit` on the native side. From WSL on `/mnt/d`, `git status` and `git add` stat every file over 9p. For a repo you must touch from WSL, enable `git config core.untrackedCache true` and `git config feature.manyFiles true`. The OpenCode runtime already passes `core.fsmonitor=false`, and `core.untrackedCache` avoids some stat storms.
 - **npm, pnpm, yarn.** Run installs where the code lives. For code on `D:`, run them from Windows. In WSL, run them in `~/work`.
 - **Docker.** The daemon runs inside WSL on the HDD. Bind-mounting `/mnt/d` into a container is the slowest case. Keep build contexts in ext4 and use `.dockerignore` to shrink them.
-- **OpenCode and OpenChamber.** OpenChamber reads `D:` with native Windows I/O. The WSL OpenCode CLI reads `/mnt/d` over 9p, so it is slower; use it for CLI verification, not for bulk work.
+- **OpenCode on Windows and in WSL.** The Windows OpenCode server that T3 Code starts reads `D:` with native Windows I/O. The WSL OpenCode CLI reads `/mnt/d` over 9p, so it is slower; use it for CLI verification, not for bulk work.
 - **File watching.** inotify does not cross the 9p boundary reliably, so a Linux watcher on `/mnt/d` can miss changes and burn CPU. Watch from the side that owns the files.
 
 ## Config changes

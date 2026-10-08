@@ -51,7 +51,7 @@ The installer adds `~/.bun/bin` to `.bashrc`. Verify with `bun --version` in a n
 
 ## OpenCode session cleanup
 
-OpenChamber auto-cleanup covers the Windows store. The WSL store is a separate database, so purge it with the script:
+This purges the OpenCode session store in WSL. It is a separate database from any Windows-side store, so run it here:
 
 ```bash
 bash wsl/cleanup-opencode-sessions.sh             # audit: list sessions older than 30 days

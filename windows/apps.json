@@ -76,6 +76,15 @@
     "versionPolicy": "store-managed"
   },
   {
+    "name": "T3 Code",
+    "id": "T3Tools.T3Code",
+    "source": "winget",
+    "role": "Desktop GUI for coding agents (Claude Code and OpenCode providers)",
+    "installByDefault": true,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
     "name": "GitHub CLI",
     "id": "GitHub.cli",
     "source": "winget",
