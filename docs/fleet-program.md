@@ -69,7 +69,7 @@ root is an install target, not a repository.
 
 ### Desktop agent app (2026-10-07)
 
-OpenChamber, a desktop app that hosted an OpenCode server and its UI, was uninstalled and replaced by T3 Code (winget `T3Tools.T3Code`). T3 Code drives coding agents through two providers, Claude Code and OpenCode, configured in its Settings screen. The workstation keeps the OpenCode CLI, Claude Code (winget `Anthropic.ClaudeCode`), Infisical, and direnv. The `apply-openchamber` recipe, its settings file, and the snapshot's OpenChamber readers were removed, and the snapshot now reports whether T3 Code's data folder exists. The Claude plugin composition stays in `maxstack`.
+OpenChamber, a desktop app that hosted an OpenCode server and its UI, was uninstalled and replaced by T3 Code (winget `T3Tools.T3Code`). T3 Code drives coding agents through two providers, Claude Code and OpenCode, configured in its Settings screen. The workstation keeps the OpenCode CLI, Claude Code (the npm global `@anthropic-ai/claude-code`), Infisical, and direnv. The `apply-openchamber` recipe, its settings file, and the snapshot's OpenChamber readers were removed, and the snapshot now reports whether T3 Code's data folder exists. The Claude plugin composition stays in `maxstack`.
 
 ### Cross-platform tooling (queued)
 
