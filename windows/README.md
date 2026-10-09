@@ -55,7 +55,7 @@ OpenCode runtime configuration and PStack moved to [`../simpsonm09-maxstack`](..
 ..\maxstack\scripts\Install-Workspace.ps1
 ```
 
-Apply it with `-Apply`. It writes the workspace `opencode.jsonc`, installs the `pstack-opencode` plugin under `.opencode\plugins`, and installs the agent profiles under `.opencode\agents`. The plugin registers the pinned PStack skills and injects the routing instruction. Provider credentials stay in OpenCode's local auth store. T3 Code's own settings and thread state are not included; see [`docs/app-settings.md`](../docs/app-settings.md). T3 Code drives the OpenCode and Claude Code providers; its Claude plugin composition is documented in `maxstack`.
+Apply it with `-Apply`. It writes the workspace `opencode.jsonc`, installs the `pstack` plugin under `.opencode\plugins`, and installs the agent profiles under `.opencode\agents`. The plugin registers the pinned PStack skills and injects the routing instruction. Provider credentials stay in OpenCode's local auth store. T3 Code's own settings and thread state are not included; see [`docs/app-settings.md`](../docs/app-settings.md). T3 Code drives the OpenCode and Claude Code providers; its Claude plugin composition is documented in `maxstack`.
 
 Do not install PStack globally. To remove the earlier global install, run `..\maxstack\scripts\Remove-GlobalPstack.ps1` on Windows and `bash scripts/remove-global-pstack.sh` inside Ubuntu WSL. Both preview first and refuse to delete content they do not recognize.
 
