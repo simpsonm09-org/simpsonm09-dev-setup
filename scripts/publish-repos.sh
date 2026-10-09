@@ -16,7 +16,6 @@ repos_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 repo_paths=(
   simpsonm09-dev-setup
   simpsonm09-maxstack
-  pstack-opencode-plugin
   simpsonm09-org-ai-plugin
   simpsonm09-personal-ai-plugin
   simpsonm09-repo-standard

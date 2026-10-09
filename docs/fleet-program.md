@@ -29,7 +29,7 @@ CI. No repository audits another, and there is no organization-wide audit.
 | Workspace composition and the installer (sets no model) | `maxstack` |
 | Organization plugin layer for OpenCode and Claude Code, including the integration registry | `org-ai-plugin` |
 | Personal plugin layer for OpenCode and Claude Code | `personal-ai-plugin` |
-| PStack plugin layer | `pstack-opencode-plugin` |
+| PStack plugin layer | `pstack-claude` fork (`plugins/pstack`), pinned in `maxstack` |
 | Workstation setup, secrets loaders, and this record | `simpsonm09-dev-setup` |
 
 ## Programs
