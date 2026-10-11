@@ -10,6 +10,7 @@ Index for this repository.
 - [Agent tools](agent-tools.md) lists the tools whose `consumers` list names `agent`; it is generated from `tools.yaml`.
 - [Application settings](app-settings.md) inventories Zed, Noctty, and T3 Code.
 - [Secrets](secrets.md) covers the secrets manager setup.
+- [Secrets design](secrets-design.md) records the command boundary and implementation decisions.
 - [Workspace environment](workspace-environment.md) records the machine and app state around the workspace.
 - [WSL performance](wsl-performance.md) measures cross-filesystem I/O.
 - [Publishing](publishing.md) covers pushing the management repositories.

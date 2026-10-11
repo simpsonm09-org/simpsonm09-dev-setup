@@ -59,7 +59,7 @@ postman whoami
 discli server list
 ```
 
-On Windows, `pwsh -File scripts\Import-Secrets.ps1` audits the secrets the loaders would set.
+Use `just secrets-init` once, then run a human command as `with-secrets <command>`. The retired `Import-Secrets.ps1` command now prints a migration error and does not change user environment values.
 
 ## 5. Refresh the token for organization rulesets (later)
 
@@ -96,7 +96,9 @@ Done on this machine. On a new machine:
    agent and `~/.config/agent-vault/human.env` for the human. Each holds the
    proxy address, the vault identity client id, and the client secret.
 
-5. Install the wrappers from `scripts/agent-vault/`: `with-vault` and
-   `with-secrets` to `~/.local/bin`, and `with-vault.ps1`, `with-secrets.ps1`,
-   and `shim/sitecustomize.py` under the Windows config directory. See
+5. Install the wrappers from `scripts/agent-vault/`: copy `with-vault`,
+   `with-secrets`, and `with-secrets.mjs` together to `~/.local/bin`, and copy
+   the PowerShell wrappers, `with-secrets.mjs`, and `shim/sitecustomize.py`
+   under the Windows config directory. Set `DEV_SETUP_ROOT` to the checkout
+   when the wrappers are copied outside it. See
    [`secrets.md`](secrets.md).

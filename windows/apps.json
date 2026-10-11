@@ -1,5 +1,14 @@
 [
   {
+    "name": "Node.js",
+    "id": "OpenJS.NodeJS.LTS",
+    "source": "winget",
+    "role": "Portable script runtime",
+    "installByDefault": false,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
     "name": "Google Chrome",
     "id": "Google.Chrome",
     "source": "winget",

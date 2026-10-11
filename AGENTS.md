@@ -8,7 +8,7 @@ Repeatable workstation setup for the Windows machines and Ubuntu on WSL2.
 - Scripts preview by default and write only on `-Apply` or `--install`.
 - Never move existing folders, overwrite personal configuration, install Windows containers, or enable a global AI configuration silently.
 - Configuration references secrets by environment variable name. Never paste a credential into the repository.
-- A service token never goes into the environment as a standing value. Reach Discord and Postman through `with-secrets` or `with-vault`; the Agent Vault proxy attaches the credential on the wire.
+- Use `with-secrets <command>` for one human command. Store access fails closed by default; `--offline` explicitly selects local fallback values. Agents use `with-vault --role agent <command>` for brokered service access.
 - No machine path, credential, or personal data is committed.
 
 ## Commands

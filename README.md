@@ -14,7 +14,7 @@ Both machines run Docker Engine inside Ubuntu WSL, and GitHub CLI is authenticat
 
 ## Secrets and the Agent Vault
 
-The human loads secrets on demand with `with-secrets <tool>`, which pulls `/secrets` and `/pii` from Infisical into that one command. The agent reaches Discord and Postman through the Agent Vault with `with-vault --role agent <tool>`, where the proxy attaches the credential on the wire and no token enters the process. The human can use the same wrapper as `with-vault --role human`, which is attributed to a separate identity. `--role` is required, so a run is never silently misattributed. The wrapper sources live in [`scripts/agent-vault/`](scripts/agent-vault/), and [`docs/secrets.md`](docs/secrets.md) has the full scheme.
+Run `just secrets-init` once, then use `with-secrets <tool> [args...]` to give one command its values. Store access fails closed by default; use `--offline` explicitly for local fallback values. Agents use the Agent Vault through `with-vault --role agent <tool>`, where the proxy attaches a credential to the request. Humans can select the separate `human` role. See [`docs/secrets.md`](docs/secrets.md).
 
 ## Quick start
 

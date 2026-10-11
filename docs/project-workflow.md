@@ -29,7 +29,7 @@ Replace `example`, branch, and base branch with the project-specific values. Nev
 
 The workspace is the tree rooted at the directory that owns the generated `opencode.jsonc` and the `.opencode/plugins` directory. That root is `D:\dev\simpsonm09`. Every repository beneath it inherits the agents and the skills, because OpenCode merges the configuration of each ancestor directory. The workspace sets no model, so each user picks the model in the harness. A feature project therefore needs no per-project setup.
 
-The `.envrc` at that root is the secret-loading boundary. direnv walks up from the current directory to the root and loads the workspace `.envrc`, which pulls the values from Infisical into the shell for every repository under the root. See [`secrets.md`](secrets.md).
+Secrets are scoped to one command with `with-secrets <command>`. Directory entry does not load values. Remove any old workspace-root `.envrc` file manually. See [`secrets.md`](secrets.md).
 
 Every canonical clone and worktree under `D:\dev\simpsonm09\projects` inherits that configuration, so PStack, its agents, and the workspace MCP servers are active in any feature project without per-project setup. The PStack plugin is not cloned under `projects/repos`. Its source is the `plugins/pstack` folder of the fork `simpsonm09/pstack-claude`, pinned in `maxstack/pstack.lock.json`, and `maxstack` installs it into the workspace.
 

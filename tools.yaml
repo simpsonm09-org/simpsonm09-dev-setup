@@ -29,6 +29,24 @@ ubuntuRelease: "26.04"
 packagePolicy: "latest from configured apt sources"
 
 tools:
+  # Runtime for the portable workstation scripts and command-scoped secrets wrapper.
+  - id: nodejs
+    name: Node.js
+    role: Portable script runtime
+    kind: cli
+    consumers:
+      - human
+    windows:
+      manager: winget
+      id: OpenJS.NodeJS.LTS
+      installByDefault: false
+    wsl:
+      manager: apt
+      package: nodejs
+    macos:
+      manager: brew
+      formula: node
+
   # WSL base prerequisites. The Windows and macOS hosts ship these already.
   - id: git
     name: Git

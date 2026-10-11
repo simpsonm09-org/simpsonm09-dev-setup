@@ -30,7 +30,11 @@ aislop:
 # Check the workspace wiring without cloning anything.
 test:
     node scripts/workspace.mjs
-    node --test scripts/tools.test.mjs scripts/setup-ops.test.mjs scripts/lib/yaml.test.mjs
+    node --test scripts/tools.test.mjs scripts/setup-ops.test.mjs scripts/lib/yaml.test.mjs scripts/with-secrets.test.mjs
+
+# Copy the ignored secrets bootstrap template once. Existing files are preserved.
+secrets-init:
+    node scripts/agent-vault/with-secrets.mjs secrets-init
 
 # Print this host's tool install plan and change nothing.
 tools:
@@ -80,7 +84,7 @@ machine-profile *args:
 test-wsl-perf *args:
     node scripts/setup-ops.mjs test-wsl-perf {{args}}
 
-# Preview or import integration secrets as Windows user environment variables (pass -Apply to write).
+# Retired compatibility command. Use with-secrets for one command.
 import-secrets *args:
     node scripts/setup-ops.mjs import-secrets {{args}}
 
@@ -104,7 +108,7 @@ install-docker-engine *args:
 install-bun *args:
     node scripts/setup-ops.mjs install-bun {{args}}
 
-# Load WSL secrets from Infisical into the shell.
+# Retired compatibility command. Use with-secrets for one command.
 load-secrets *args:
     node scripts/setup-ops.mjs load-secrets {{args}}
 

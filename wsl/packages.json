@@ -1,6 +1,7 @@
 {
   "ubuntuRelease": "26.04",
   "aptPackages": [
+    "nodejs",
     "git",
     "curl",
     "ca-certificates",

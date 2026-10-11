@@ -42,7 +42,7 @@ Draft order. Each step ends with a check, and the order can change once the deci
 3. Install WSL2 with one Ubuntu distribution. Move the VHDX to `D:` before installing Docker. See [hardware setup options](README.md).
 4. Run the WSL bootstrap from `simpsonm09-dev-setup` in audit mode, then run it with `--install`. Verify `hello-world` and a `D:` bind mount.
 5. Add Defender exclusions from an elevated shell. See [wsl-performance](../wsl-performance.md).
-6. Start the Compose services under [services](../../services/README.md). Load secrets with `Import-Secrets.ps1`.
+6. Start the Compose services under [services](../../services/README.md). Use `with-secrets <command>` for a human process that needs store values.
 7. Configure remote access. Restrict it to the local network or a VPN, and turn off password authentication for SSH.
 8. Set the power plan so the machine never sleeps. Enable restart after power loss in the firmware.
 9. Give Windows Update a maintenance window and defer feature updates.

@@ -40,7 +40,7 @@
       "id": "import-secrets",
       "platforms": ["windows"],
       "windows": "scripts/Import-Secrets.ps1",
-      "description": "Preview or import integration secrets as Windows user environment variables (pass -Apply to write)."
+      "description": "Retired compatibility command; use with-secrets for one command."
     },
     {
       "id": "configure-git-identity",
@@ -76,7 +76,7 @@
       "id": "load-secrets",
       "platforms": ["linux"],
       "posix": "wsl/load-secrets.sh",
-      "description": "Load WSL secrets from Infisical into the shell."
+      "description": "Retired compatibility command; use with-secrets for one command."
     },
     {
       "id": "cleanup-sessions",
