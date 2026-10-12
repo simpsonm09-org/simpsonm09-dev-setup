@@ -2,6 +2,18 @@
 
 This is optional. Use it only to check that the Pi harness can reach a model on this machine. This repository does not start a server, download a model, or register a service.
 
+## Three ways to check Pi
+
+| Rung | Use | Model |
+| --- | --- | --- |
+| 1. Stub API | Proves Pi starts, loads the layers, and the gate blocks. | None, and no GPU or download. maxstack provides a Pi smoke check, run from maxstack with `just verify-pi`, against a tiny stub server with canned replies. |
+| 2. Lightweight model | Proves Pi can hold a real exchange and call a tool. Not for real work. | Roughly 1 to 4 billion parameters, 1 to 3 GB on disk, served by llama.cpp. |
+| 3. Workhorse | Work delegated from a cloud planner. | The largest model that fits the GPU memory with room left for context. |
+
+Rung 3 is sized by a rule, not by a named model. The GPU memory is in the machine's record in `simpsonm09-machine-inventory`, at `capabilities.localInference.vramGb`. As rules of thumb for a 16 GB GPU, about 14B parameters at a higher-quality quantization, or 20 to 24B at 4-bit, stays fully on the GPU with a moderate context window. A model that spills into system RAM runs several times slower and is poor for agent loops. For a coding agent, context length matters as much as parameter count.
+
+The model is your choice, rankings change often, and this ladder is optional. Steps 1 to 4 below apply to rungs 2 and 3.
+
 ## 1. Install llama.cpp
 
 llama.cpp is an opt-in entry in [`tools.yaml`](../tools.yaml), so the setup skips it by default. Run `just tools` to see its line, then install it by hand with the package for your platform:
@@ -10,7 +22,9 @@ llama.cpp is an opt-in entry in [`tools.yaml`](../tools.yaml), so the setup skip
 - Ubuntu on WSL2: `sudo apt install llama.cpp-tools`
 - macOS: `brew install llama.cpp`
 
-The Ubuntu package also installs a `llama-server` systemd unit. This guide does not use it. Run the server in the foreground as shown in the next step.
+The winget package is the Vulkan build of llama.cpp. A CUDA build comes from the [llama.cpp releases page](https://github.com/ggml-org/llama.cpp/releases) and is your choice.
+
+Caution: the Ubuntu package installs a `llama-server` systemd unit. After installing, run `systemctl is-enabled llama-server`. If it prints `enabled`, run `sudo systemctl disable --now llama-server`, so nothing listens until you start the server yourself. Run the server in the foreground as shown in the next step.
 
 ## 2. Start the server
 
