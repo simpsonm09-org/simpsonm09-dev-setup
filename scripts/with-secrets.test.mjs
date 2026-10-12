@@ -277,21 +277,15 @@ test('strict dotenv parser accepts comments and equals in values, rejects duplic
 });
 
 test('Windows CLI resolution supports a native executable and refuses shell shims', () => {
-  const root = mkdtempSync(join(tmpdir(), 'dev-setup-secrets-cli-'));
-  try {
-    const native = join(root, 'infisical.exe');
-    const shim = join(root, 'infisical.cmd');
-    writeFileSync(native, 'fake binary marker');
-    writeFileSync(shim, 'fake command shim');
-    assert.equal(resolveInfisical('win32', { DEV_SETUP_INFISICAL_PATH: native }), native);
-    assert.equal(resolveInfisical('win32', { DEV_SETUP_INFISICAL_PATH: shim }), null);
-    const installed = join(root, 'npm', 'node_modules', '@infisical', 'cli', 'bin', 'infisical.exe');
-    mkdirSync(dirname(installed), { recursive: true });
-    writeFileSync(installed, 'fake binary marker');
-    assert.equal(resolveInfisical('win32', { APPDATA: root, PATH: '' }), installed);
-  } finally {
-    rmSync(root, { recursive: true, force: true });
-  }
+  const native = 'C:\\tools\\infisical\\infisical.exe';
+  const shim = 'C:\\tools\\infisical\\infisical.cmd';
+  const appData = 'C:\\Users\\someone\\AppData\\Roaming';
+  const installed = `${appData}\\npm\\node_modules\\@infisical\\cli\\bin\\infisical.exe`;
+  const present = new Set([native, shim, installed]);
+  const exists = (path) => present.has(path);
+  assert.equal(resolveInfisical('win32', { DEV_SETUP_INFISICAL_PATH: native }, exists), native);
+  assert.equal(resolveInfisical('win32', { DEV_SETUP_INFISICAL_PATH: shim }, exists), null);
+  assert.equal(resolveInfisical('win32', { APPDATA: appData, PATH: '' }, exists), installed);
 });
 
 test('online wrapper gives merged values only to target, keeps argv/status/output, and hides bootstrap auth', async () => {
@@ -543,7 +537,7 @@ function signalTarget(root, body) {
   writeFileSync(file, [
     "import { writeFileSync } from 'node:fs';",
     `const marker = ${JSON.stringify(join(root, 'target-marker'))};`,
-    "process.stdout.write('READY\n');",
+    "process.stdout.write('READY\\n');",
     body,
   ].join('\n'));
   return file;
