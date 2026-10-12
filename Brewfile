@@ -13,5 +13,6 @@ brew "helm"
 brew "kustomize"
 brew "himalaya"
 brew "ntfy"
+# opt-in: brew "llama.cpp" Opt-in only; needed just to run a local model for the Pi harness.
 brew "mise"
 brew "trivy"

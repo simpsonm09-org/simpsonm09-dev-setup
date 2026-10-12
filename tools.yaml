@@ -450,6 +450,27 @@ tools:
       url: https://code.claude.com/docs/en/setup
       installPolicy: manual-official-release
 
+  # Optional local model server for the Pi harness. Opt-in on every platform.
+  - id: llama-cpp
+    name: llama.cpp
+    role: Local model server for the Pi harness
+    kind: cli
+    consumers:
+      - human
+    policy: latest
+    note: Opt-in only; needed just to run a local model for the Pi harness.
+    installByDefault: false
+    requiresExplicitOptIn: true
+    windows:
+      manager: winget
+      id: ggml.llamacpp
+    wsl:
+      manager: apt
+      package: llama.cpp-tools
+    macos:
+      manager: brew
+      formula: llama.cpp
+
   # Agent and service-owner CLI tools. The service-integrations registry names
   # mise, infisical, trivy, playwright-cli, chrome-devtools, and ctx7.
   - id: mise

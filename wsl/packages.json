@@ -79,6 +79,10 @@
     {
       "id": "docker",
       "label": "apt `docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin`"
+    },
+    {
+      "id": "llama-cpp",
+      "label": "apt `llama.cpp-tools`"
     }
   ]
 }

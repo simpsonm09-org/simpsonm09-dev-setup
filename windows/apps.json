@@ -130,6 +130,16 @@
     "versionPolicy": "latest"
   },
   {
+    "name": "llama.cpp",
+    "id": "ggml.llamacpp",
+    "source": "winget",
+    "role": "Local model server for the Pi harness",
+    "installByDefault": false,
+    "requiresExplicitOptIn": true,
+    "version": null,
+    "versionPolicy": "latest"
+  },
+  {
     "name": "mise",
     "id": "jdx.mise",
     "source": "winget",

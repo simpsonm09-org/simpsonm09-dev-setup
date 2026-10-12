@@ -539,6 +539,31 @@
       }
     },
     {
+      "id": "llama-cpp",
+      "name": "llama.cpp",
+      "role": "Local model server for the Pi harness",
+      "kind": "cli",
+      "consumers": [
+        "human"
+      ],
+      "policy": "latest",
+      "note": "Opt-in only; needed just to run a local model for the Pi harness.",
+      "installByDefault": false,
+      "requiresExplicitOptIn": true,
+      "windows": {
+        "manager": "winget",
+        "id": "ggml.llamacpp"
+      },
+      "wsl": {
+        "manager": "apt",
+        "package": "llama.cpp-tools"
+      },
+      "macos": {
+        "manager": "brew",
+        "formula": "llama.cpp"
+      }
+    },
+    {
       "id": "mise",
       "name": "mise",
       "role": "Pinned tool versions",
