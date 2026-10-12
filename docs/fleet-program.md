@@ -56,9 +56,10 @@ The registry lives in `org-ai-plugin/skills/service-integrations/SKILL.md`.
 ### Secrets and integrations
 
 Infisical, Portainer CE, and DbGate run on the WSL Docker Engine. Infisical is the source
-of truth for integration secrets, read by one Universal Auth machine identity per machine.
-The workspace `.envrc` loads them in WSL and `scripts/Import-Secrets.ps1` loads them on
-Windows. See [`secrets.md`](secrets.md) and [`manual-steps.md`](manual-steps.md).
+of truth for integration secrets. `with-secrets <command>` gives values to one human
+command; `with-vault --role human|agent <command>` uses the broker. Old shell and
+persistent-user import paths now show a migration error. See [`secrets.md`](secrets.md)
+and [`manual-steps.md`](manual-steps.md).
 
 ### Workspace layout
 

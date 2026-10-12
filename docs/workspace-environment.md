@@ -29,18 +29,18 @@ This writes `docs/workspace-environment.snapshot.json`. The script reads only th
 
 - App data folder: `%USERPROFILE%\.t3\userdata`. The snapshot records only whether it exists and the installed app version from the Windows uninstall registry. It does not read settings, thread history, or provider auth from that folder.
 - T3 Code drives two providers, Claude Code and OpenCode, configured in the app's Settings screen. Each provider instance can carry its own environment variables. After changing plugins, skills, or MCP servers, use "Restart agent session" in T3 Code.
-- T3 starts its own `opencode serve` for each session. That server inherits the environment T3 Code was launched with, so user-level variables set by `scripts/Import-Secrets.ps1` reach agents only after T3 Code restarts.
+- T3 starts its own `opencode serve` for each session. The server inherits the environment T3 Code was launched with. Do not use persistent user variables for integration secrets; use the one-command wrapper or Agent Vault.
 - OpenCode finds `<workspace>\.opencode` by walking up from a repository, so it needs no extra setting. The Claude provider instance points at the workspace plugin directory. The plugin composition belongs to `maxstack`; see its `docs/t3-setup.md`.
 
 ### Secrets
 
-Integration secrets come from self-hosted Infisical at `http://localhost:8088` and are pulled per runtime. The `dev` environment holds two folders: `/secrets` for credentials, and `/pii` for PII and person or machine config. The bootstrap file `settings/.env` holds only the machine identity that unlocks the project plus a small offline fallback, and it is gitignored. WSL loads the folders through the workspace `.envrc` with direnv; Windows loads them through `scripts/Import-Secrets.ps1 -Apply`, and T3 Code's agent sessions see them after a restart. The `with-secrets` and `with-vault` wrappers load the same values into one command.
+Integration secrets come from the configured Infisical project and are pulled for one command. The store has `/secrets` for credentials and `/pii` for personal or machine configuration. The ignored `settings/.env` holds only store unlock values and a small offline fallback. Run `with-secrets <command>` for a human command; it fails closed unless `--offline` is explicit. Directory entry does not load secrets. Remove any old workspace-root `.envrc` file manually. Agent Vault remains the brokered path for compatible tools.
 
 The Agent Vault proxy runs as the systemd user service `agent-vault-proxy` on `127.0.0.1:17323`, brokering `discord` and `postman` requests for the `Agent-Vault-Runner` and `Human-Vault-Runner` identities. The role configs live outside the repositories at `~/.config/agent-vault/env` and `~/.config/agent-vault/human.env`, at mode `0600`. See [`secrets.md`](secrets.md).
 
 ### Runtime tools
 
-- Node.js and `npx` on Windows run the local MCP servers. Ubuntu WSL has no native Node and reaches the Windows `npx` through `/mnt/c`.
+- Node.js is provisioned on Windows, WSL, and macOS through `tools.yaml`. The portable setup scripts and POSIX `with-secrets` wrapper use the local Node runtime. Windows `npx` runs the local MCP servers.
 - Docker runs inside Ubuntu WSL and backs the disabled `sqlite` MCP server.
 - Git identity: Windows has a global identity; WSL does not. Only presence is recorded, never the values.
 

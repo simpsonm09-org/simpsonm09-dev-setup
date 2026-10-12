@@ -1,4 +1,5 @@
 # Generated from tools.yaml by scripts/tools.mjs. Do not edit by hand.
+brew "node"
 cask "google-chrome"
 cask "github"
 cask "ghostty"
