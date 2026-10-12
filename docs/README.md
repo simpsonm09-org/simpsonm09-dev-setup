@@ -8,6 +8,7 @@ Index for this repository.
 - [Setup](setup.md) is the safe setup order.
 - [Apps and roles](apps.md) lists the workstation apps and the install-source policy; it is generated from `tools.yaml`.
 - [Agent tools](agent-tools.md) lists the tools whose `consumers` list names `agent`; it is generated from `tools.yaml`.
+- [A local model for Pi](local-model.md) is an optional local model server for checking the Pi harness.
 - [Application settings](app-settings.md) inventories Zed, Noctty, and T3 Code.
 - [Secrets](secrets.md) covers the secrets manager setup.
 - [Secrets design](secrets-design.md) records the command boundary and implementation decisions.

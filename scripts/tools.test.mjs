@@ -106,7 +106,7 @@ test('renderWslPackages covers every WSL manager tools.yaml declares', () => {
   ]);
   assert.deepEqual(wsl.snapPackages, [{ id: 'terminal', package: 'ghostty', classic: true }]);
   assert.equal(wsl.manualTools.opencode.updateCommand, 'opencode upgrade');
-  assert.deepEqual(wsl.deferredTools.map((entry) => entry.id), ['docker']);
+  assert.deepEqual(wsl.deferredTools.map((entry) => entry.id), ['docker', 'llama-cpp']);
 });
 
 test('renderBrewfile comments out the opt-in docker-desktop cask', () => {
