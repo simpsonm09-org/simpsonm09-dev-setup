@@ -31,7 +31,7 @@ The workspace is the tree rooted at the directory that owns the generated `openc
 
 Secrets are scoped to one command with `with-secrets <command>`. Directory entry does not load values. Remove any old workspace-root `.envrc` file manually. See [`secrets.md`](secrets.md).
 
-Every canonical clone and worktree under `D:\dev\simpsonm09\projects` inherits that configuration, so PStack, its agents, and the workspace MCP servers are active in any feature project without per-project setup. The PStack plugin is not cloned under `projects/repos`. Its source is the `plugins/pstack` folder of the fork `simpsonm09/pstack-claude`, pinned in `maxstack/pstack.lock.json`, and `maxstack` installs it into the workspace.
+Every canonical clone and worktree under `D:\dev\simpsonm09\projects` inherits that configuration, so PStack, its agents, and the workspace MCP servers are active in any feature project without per-project setup. The PStack plugin is not cloned under `projects/repos`. Its source is the `plugins/pstack` folder of pstack-max, our fork of pstack-claude, pinned in `maxstack/pstack.lock.json`, and `maxstack` installs it into the workspace.
 
 Canonical clones stay on `D:` on both machines so Windows and WSL share them. For Linux-heavy work, clone or rsync into the ext4 working area at `~/work`. The disk behind `~/work` differs by machine, so see [`machines/`](machines/README.md) and [`wsl-performance.md`](wsl-performance.md).
 
