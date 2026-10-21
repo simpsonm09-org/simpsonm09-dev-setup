@@ -5,9 +5,10 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { credentialRules } from './check-worktreeinclude.mjs';
+import { forbiddenRules } from './check-worktreeinclude.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(HERE, '..');
 const SENTINEL = 'SENTINEL-NOT-A-SECRET-1234';
 
 function child(command, args, env = process.env) {
@@ -15,12 +16,67 @@ function child(command, args, env = process.env) {
 }
 
 test('worktree includes reject credential names without opening any listed path', () => {
-  for (const name of ['.env', '.env.local', '.envrc', 'private.key', 'tls.pem',
-    'accessToken', 'secret-config', 'auth.json', 'credentials.json', '.ENV.PROD']) {
-    assert.deepEqual(credentialRules(`services/${name}\n`), [`services/${name}`]);
+  for (const name of ['.env.local', '.env.prod', '.envrc', '.ENV.PROD', 'private.key', 'tls.pem',
+    'accessToken', 'secret-config', 'auth.json', 'credentials.json']) {
+    assert.deepEqual(forbiddenRules(`services/${name}\n`), [`services/${name}`]);
   }
-  assert.deepEqual(credentialRules('# .env is forbidden\nsettings/editor.json\n'), []);
-  assert.deepEqual(credentialRules('services\\infisical\\.env\n'), ['services\\infisical\\.env']);
+  assert.deepEqual(forbiddenRules('# .env is local config\n'), []);
+  assert.deepEqual(forbiddenRules('settings/editor.json\n'), ['settings/editor.json']);
+  assert.deepEqual(forbiddenRules('services\\infisical\\.env\n'), ['services\\infisical\\.env']);
+});
+
+test('local config .env copies are allowed by kind, not by one path', () => {
+  for (const rule of ['services/litellm/.env', 'services\\litellm\\.env', './services/litellm/.env',
+    'services/dbgate/.env', 'services/litellm/.ENV']) {
+    assert.deepEqual(forbiddenRules(`${rule}\n`), [], rule);
+  }
+});
+
+test('known secret sources stay blocked even though they are named .env', () => {
+  for (const rule of ['settings/.env', 'Settings\\.ENV', './settings/.env',
+    'services/infisical/.env', 'SERVICES/Infisical/.env', '.\\services\\infisical\\.env']) {
+    assert.deepEqual(forbiddenRules(`${rule}\n`), [rule], rule);
+  }
+});
+
+test('internal dot segments cannot reach a known secret source', () => {
+  for (const rule of ['settings/./.env', 'settings\\.\\.env', './settings/./.env',
+    'services/infisical/./.env', 'services\\infisical\\.\\.env', 'services/./infisical/.env',
+    'SERVICES/./Infisical/./.ENV', '././settings/.env']) {
+    assert.deepEqual(forbiddenRules(`${rule}\n`), [rule], rule);
+  }
+  assert.deepEqual(forbiddenRules('services/./litellm/.env\n'), []);
+});
+
+test('drive-qualified and absolute paths are rejected in every Windows form', () => {
+  for (const rule of ['C:/foo/.env', 'C:\\foo\\.env', 'C:foo/.env', 'c:.env', 'C:.env',
+    'D:\\dev\\simpsonm09\\services\\litellm\\.env', 'D:/dev/simpsonm09/services/litellm/.env',
+    'services/litellm/C:.env', 'services/litellm/.env:Zone.Identifier', '\\\\server\\share\\.env',
+    '//server/share/.env', '/services/litellm/.env']) {
+    assert.deepEqual(forbiddenRules(`${rule}\n`), [rule], rule);
+  }
+});
+
+test('rules that cannot be checked by exact name are rejected', () => {
+  for (const rule of ['services/*/.env', 'services/litellm/.env.*', 'services/litellm/.env?',
+    'services/litellm/', 'services/litellm', 'services/infisical', '!services/litellm/.env',
+    '../other/.env', '/abs/.env', 'services/secrets/config.json', 'services/token/.env',
+    'services/litellm/config.yaml']) {
+    assert.deepEqual(forbiddenRules(`${rule}\n`), [rule], rule);
+  }
+});
+
+test('the committed include copies only the gateway local config', () => {
+  const rules = readFileSync(join(ROOT, '.worktreeinclude'), 'utf8').split(/\r?\n/)
+    .map((line) => line.trim()).filter((line) => line && !line.startsWith('#'));
+  assert.deepEqual(rules, ['services/litellm/.env']);
+  assert.deepEqual(forbiddenRules(rules.join('\n')), []);
+});
+
+test('.env stays ignored and the tracked scaffolds stay unignored', () => {
+  const ignore = readFileSync(join(ROOT, '.gitignore'), 'utf8').split(/\r?\n/);
+  assert.ok(ignore.includes('.env'));
+  assert.ok(ignore.includes('!.env.example'));
 });
 
 test('worktreeinclude CLI exits 1 for the broker .env fixture', () => {
@@ -30,7 +86,7 @@ test('worktreeinclude CLI exits 1 for the broker .env fixture', () => {
     writeFileSync(fixture, 'services/infisical/.env\n');
     const bad = child(process.execPath, [join(HERE, 'check-worktreeinclude.mjs'), fixture]);
     assert.equal(bad.status, 1, bad.stderr);
-    assert.match(bad.stderr, /credential file rules are forbidden/);
+    assert.match(bad.stderr, /only exact local config .env rules are allowed/);
     writeFileSync(fixture, '# No credential files.\n');
     assert.equal(child(process.execPath, [join(HERE, 'check-worktreeinclude.mjs'), fixture]).status, 0);
   } finally {

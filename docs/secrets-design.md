@@ -20,8 +20,9 @@ the current implementation until the broker client replaces it.
    cannot access its storage, processes, or Docker.
 
 Keep `.env`, committed `.env.example`, and `.worktreeinclude` for easily tweaked
-non-secret settings in any repository. Move secrets and personal data out of
-`.env` files into the broker. Current dev-setup bootstrap files are migration
+non-secret settings in any repository. `.worktreeinclude` may copy a local `.env`
+between worktrees on one machine; the copy is never committed or uploaded.
+Move secrets and personal data out of `.env` files into the broker. Current dev-setup bootstrap files are migration
 debt, not permission to add secret values.
 
 ### Exceptions

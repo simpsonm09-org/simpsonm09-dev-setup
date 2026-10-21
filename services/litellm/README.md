@@ -47,7 +47,8 @@ Configure llama.cpp with `--alias local-qwen`. Only the five listed non-secret
 settings belong in `.env`. The validator rejects credentials, extra variables,
 expansions, public bind addresses and unpinned images; it checks inherited
 setting overrides too. This gitignored file is eligible for worktree copying
-because it contains only those settings. Never put client keys in it.
+because it contains only those settings. The copy stays local and is never
+uploaded. Never put client keys in it.
 
 With the broker login already supplied, from this directory:
 
