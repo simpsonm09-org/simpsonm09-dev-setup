@@ -179,6 +179,21 @@ environment.
 
 ## Agent Vault
 
+The migration target declares consumers in
+[`settings/secret-consumers.json`](../settings/secret-consumers.json), checked by
+the adjacent JSON Schema and `scripts/check-secret-consumers.mjs` in `just test`.
+These declarations contain names only and do not change either wrapper today.
+
+The file's `agentEnvironmentAllowlist` is the future broker client's complete
+inheritance list: `LANG`, `LC_ALL`, `TERM`, `NO_COLOR`, `FORCE_COLOR`, and `TZ`.
+These variables carry non-secret locale, terminal, color, and timezone settings.
+Anything not on this list is stripped by the future broker client. The client
+must not inherit upstream credentials, broker credentials, personal metadata,
+proxy credentials, or variables that select executable code. A short-lived
+session token requires the separate scope and expiry exception in
+[`secrets-design.md`](secrets-design.md); it is not an inherited variable.
+This step adds data and documentation only; filtering is not implemented yet.
+
 `with-vault` remains the brokered path and requires an explicit `--role`
 value. Human and agent roles use separate configuration files outside the
 repository. The proxy attaches the service credential to the request. The

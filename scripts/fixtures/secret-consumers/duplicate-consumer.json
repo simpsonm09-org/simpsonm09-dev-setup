@@ -1,0 +1,7 @@
+{
+  "consumers": [
+    { "consumer": "fixture", "brokerIdentity": "Fixture-Runner", "bundle": "fixture", "credentialNames": ["FIXTURE_API_KEY"], "operations": ["sign"] },
+    { "consumer": "fixture", "brokerIdentity": "Fixture-Runner", "bundle": "fixture", "credentialNames": ["FIXTURE_API_KEY"], "operations": ["sign"] }
+  ],
+  "agentEnvironmentAllowlist": []
+}
