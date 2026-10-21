@@ -6,10 +6,10 @@ Two machine classes cover the fleet. The class describes the storage shape, not 
 
 | Class | Storage shape | Option | WSL VHDX | Tooling | Ext4 working area |
 | --- | --- | --- | --- | --- | --- |
-| Desktop-class | A fast NVMe SSD with room to spare, plus one or more large HDDs | `storage-ample` | On the fast disk | On the fast disk | `~/work`, fast |
-| Laptop-class | A small or nearly full fast disk that cannot host the VHDX, plus a large disk | `storage-constrained` | On the large disk | On the large disk | `~/work`, slower |
+| Desktop-class | A fast NVMe SSD with room to spare, plus one or more large HDDs | `storage-ample` | On the fast disk | On the fast disk | `~/.cache/workspace-builds`, fast |
+| Laptop-class | A small or nearly full fast disk that cannot host the VHDX, plus a large disk | `storage-constrained` | On the large disk | On the large disk | `~/.cache/workspace-builds`, slower |
 
-Both options keep the canonical project clone on the Windows workspace drive (the `D:` drive in this setup) so Windows and WSL share it, and both keep Linux-heavy I/O in ext4.
+Both options keep the canonical project clone on the Windows workspace drive (the `D:` drive in this setup) so Windows and WSL share it, and both keep Linux dependency caches and build output in ext4. Source clones and worktrees remain under the workspace; home directories must not contain checkouts.
 
 ## Best practices by class
 

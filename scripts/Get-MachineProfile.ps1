@@ -32,6 +32,6 @@ $plan = switch ($profile) {
     vhdxLocation     = $plan.vhdx
     toolingLocation  = $plan.tooling
     projectsLocation = 'D:\dev\simpsonm09\projects'
-    ext4WorkingArea  = '~/work'
+    ext4WorkingArea  = '~/.cache/workspace-builds'
     doc              = 'docs/machines/README.md'
 }

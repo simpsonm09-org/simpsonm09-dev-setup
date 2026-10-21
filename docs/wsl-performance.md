@@ -40,27 +40,27 @@ The workspace lives on `D:` so the Windows T3 Code app and the WSL OpenCode CLI 
 ## Rules
 
 1. Shared source, Windows-side work, and cross-runtime sharing stay on `D:`.
-2. Linux-heavy I/O stays in ext4. That covers clones and worktrees you operate from Linux, `node_modules`, build output, test temp dirs, Docker build contexts, and package caches.
-3. Run each tool on the side that owns the files. Node or TypeScript builds and Docker builds belong in ext4. Windows T3 Code work belongs on `D:`.
+2. Linux-heavy I/O stays in ext4. That covers virtual environments, dependencies, build output, test temp dirs, Docker build contexts, and package caches. Source clones and worktrees stay in the workspace.
+3. Run each tool on the side that owns the files. Source on `D:` builds from Windows unless the tool can keep its dependency tree and output in ext4. Docker build contexts belong in ext4. Windows T3 Code work belongs on `D:`.
 4. Never put `node_modules` or a build tree on `/mnt`.
 
 ## The ext4 working area
 
-Keep the shared, canonical copy on `D:` for sharing and Windows access. For Linux-heavy work, use the ext4 arena at `~/work`:
+Keep every source clone under `<workspace>/projects/repos` and linked worktrees
+under `<workspace>/projects/worktrees`. Use those same paths through `/mnt/d`
+from WSL. Do not create extra checkouts in a Windows or WSL home directory,
+including `~/work`.
 
-```bash
-mkdir -p ~/work
-git clone /mnt/d/dev/simpsonm09/projects/repos/<repo> ~/work/<repo>
-# open it from Windows when needed:
-explorer.exe "$(wslpath -w ~/work/<repo>)"   # or browse \\wsl$\<distro>\home\<user>\work
-```
-
-Do not run `npm install`, `docker build`, or test loops against `/mnt/d`.
+Use `~/.cache/workspace-builds` for disposable Linux build output, test temp
+directories, and dependency caches, and `~/.local/share` for Linux application
+virtual environments. These directories hold runtime and build data, not Git
+checkouts. Configure tools to use external output and cache directories. Run
+builds from Windows when the tool cannot keep heavy I/O outside the source tree.
 
 ## Activity guidance
 
 - **Git.** Run `git status`, `fetch`, `add`, and `commit` on the native side. From WSL on `/mnt/d`, `git status` and `git add` stat every file over 9p. For a repo you must touch from WSL, enable `git config core.untrackedCache true` and `git config feature.manyFiles true`. The OpenCode runtime already passes `core.fsmonitor=false`, and `core.untrackedCache` avoids some stat storms.
-- **npm, pnpm, yarn.** Run installs where the code lives. For code on `D:`, run them from Windows. In WSL, run them in `~/work`.
+- **npm, pnpm, yarn.** Run installs and builds from Windows for source on `D:`. A package download cache in ext4 does not relocate `node_modules`. Run a Linux build only when the tool supports an external dependency tree and output directory; otherwise use Windows. Source remains in the workspace.
 - **Docker.** The daemon runs inside WSL on the HDD. Bind-mounting `/mnt/d` into a container is the slowest case. Keep build contexts in ext4 and use `.dockerignore` to shrink them.
 - **OpenCode on Windows and in WSL.** The Windows OpenCode server that T3 Code starts reads `D:` with native Windows I/O. The WSL OpenCode CLI reads `/mnt/d` over 9p, so it is slower; use it for CLI verification, not for bulk work.
 - **File watching.** inotify does not cross the 9p boundary reliably, so a Linux watcher on `/mnt/d` can miss changes and burn CPU. Watch from the side that owns the files.
