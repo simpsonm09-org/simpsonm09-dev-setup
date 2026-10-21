@@ -193,9 +193,8 @@ WSL loader returns status 1 and leaves the shell open; running it directly
 exits 1. Any workspace-root `.envrc` files were created by users and must be
 removed manually. Setup does not delete them. `with-secrets` and
 `secrets-init` print one warning line when the current directory or one of its
-parents has a `.envrc` that still imports secrets. The detector matches the
-marker text `dotenv_if_exists` or `infisical export`; it never prints or parses
-the file. The committed `.envrc` template is an
+parents has a `.envrc`. The detector checks file presence only; it never
+opens the file or claims that it imports secrets. The committed `.envrc` template is an
 inert one-release note. The WSL loader, template, and error recipes are slated
 for removal in the next release.
 
@@ -205,3 +204,14 @@ environment settings. Restart applications after removing old values.
 
 For the implementation decisions and verification limits, see
 [`secrets-design.md`](secrets-design.md).
+
+## Worktree copies and snapshots
+
+`.worktreeinclude` must never list credential files. `just test` checks inclusion
+rules by name without opening their targets. The owner must manually remove
+existing credential copies from old worktrees; changing the rule does not delete them.
+
+Environment snapshots record only file existence, size, and last write time for
+configuration files. They no longer capture config, instruction, or WSL file
+contents. Existing snapshots and whole-file settings backups may still contain
+credentials. The owner must review and remove those through a trusted path.

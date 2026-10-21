@@ -839,7 +839,7 @@ test('retired load-secrets returns to a sourcing shell and exits when executed',
   }
 });
 
-test('a retired workspace .envrc is found by marker text and its content is never returned', () => {
+test('a workspace .envrc is found by presence regardless of its content', () => {
   const workspace = mkdtempSync(join(tmpdir(), 'dev-setup-secrets-envrc-'));
   try {
     const repo = join(workspace, 'projects', 'repos', 'repo');
@@ -847,26 +847,35 @@ test('a retired workspace .envrc is found by marker text and its content is neve
     writeFileSync(join(workspace, '.envrc'), '# legacy\ndotenv_if_exists "settings/.env"\nCANARY_ENVRC_CONTENT=1\n');
     assert.equal(findRetiredEnvrc(repo), join(workspace, '.envrc'));
     writeFileSync(join(workspace, '.envrc'), 'export EDITOR=vim\n');
-    assert.equal(findRetiredEnvrc(repo), null);
+    assert.equal(findRetiredEnvrc(repo), join(workspace, '.envrc'));
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }
 });
 
-test('the retired .envrc detector reads at most 64 KiB: an early marker is found, one past the cap is not, and a large file is not read whole', () => {
-  const workspace = mkdtempSync(join(TEMP, 'dev-setup-secrets-envrc-cap-'));
+test('the .envrc detector never opens the file', () => {
+  const workspace = mkdtempSync(join(TEMP, 'dev-setup-secrets-envrc-unread-'));
   try {
-    const envrc = join(workspace, '.envrc');
-    writeFileSync(envrc, `dotenv_if_exists "settings/.env"\n${'x'.repeat(1024 * 1024)}`);
-    assert.equal(findRetiredEnvrc(workspace), envrc);
-    writeFileSync(envrc, `${'x'.repeat(70 * 1024)}\ninfisical export --path /secrets\n`);
-    assert.equal(findRetiredEnvrc(workspace), null);
+    const probe = spawnSync(process.execPath, ['--input-type=module', '-e', `
+      import fs from 'node:fs';
+      import { syncBuiltinESMExports } from 'node:module';
+      const { findRetiredEnvrc } = await import(${JSON.stringify(pathToFileURL(join(HERE, 'agent-vault', 'with-secrets-envrc.mjs')).href)});
+      fs.lstatSync = (path) => {
+        if (path === ${JSON.stringify(join(workspace, '.envrc'))}) return { isDirectory: () => false };
+        throw new Error('unexpected metadata probe');
+      };
+      fs.openSync = fs.readFileSync = () => { throw new Error('file contents must never be read'); };
+      syncBuiltinESMExports();
+      process.stdout.write(findRetiredEnvrc(${JSON.stringify(workspace)}));
+    `], { encoding: 'utf8', windowsHide: true });
+    assert.equal(probe.status, 0, probe.stderr);
+    assert.equal(probe.stdout, join(workspace, '.envrc'));
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }
 });
 
-test('the retired .envrc detector skips a FIFO without opening it, so it cannot block the run', { skip: process.platform === 'win32' ? 'Windows has no FIFO; Linux CI runs this' : false, timeout: 15000 }, () => {
+test('the .envrc detector finds a FIFO without opening it', { skip: process.platform === 'win32' ? 'Windows has no FIFO; Linux CI runs this' : false, timeout: 15000 }, () => {
   const workspace = mkdtempSync(join(TEMP, 'dev-setup-secrets-fifo-'));
   try {
     const fifo = join(workspace, '.envrc');
@@ -874,7 +883,7 @@ test('the retired .envrc detector skips a FIFO without opening it, so it cannot 
     assert.equal(made.status, 0, 'mkfifo is needed for this test');
     const probe = spawnSync(process.execPath, ['--input-type=module', '-e', `import { findRetiredEnvrc } from ${JSON.stringify(pathToFileURL(join(HERE, 'agent-vault', 'with-secrets-envrc.mjs')).href)}; process.stdout.write(String(findRetiredEnvrc(${JSON.stringify(workspace)})));`], { encoding: 'utf8', timeout: 5000, windowsHide: true, env: isolatedEnv() });
     assert.equal(probe.error, undefined, 'the detector blocked on the FIFO');
-    assert.equal(probe.stdout, 'null');
+    assert.equal(probe.stdout, fifo);
   } finally {
     rmSync(workspace, { recursive: true, force: true });
   }

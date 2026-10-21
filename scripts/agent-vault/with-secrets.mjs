@@ -44,7 +44,7 @@ function main(argv = process.argv.slice(2)) {
   // DEV_SETUP_ROOT redirects the whole settings file, so every run names it.
   if (process.env.DEV_SETUP_ROOT) process.stderr.write(`with-secrets: DEV_SETUP_ROOT redirects settings to ${root}\n`);
   const retired = findRetiredEnvrc(process.cwd());
-  if (retired) process.stderr.write(`with-secrets: ${retired} still imports secrets through direnv; remove it. Secrets no longer load from .envrc.\n`);
+  if (retired) process.stderr.write(`with-secrets: ${retired} is present; review it for legacy direnv secret loading. Secrets no longer load from .envrc.\n`);
   if (argv[0] === 'secrets-init') {
     try { initializeEnvFile(root); } catch (error) {
       fail(error.message);

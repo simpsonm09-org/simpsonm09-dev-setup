@@ -76,10 +76,9 @@ Done on this machine. On a new machine:
 1. Enroll the proxy once. The enrollment token is spent after the first start,
    so keep it off the process arguments and off any committed file.
 
-   ```bash
-   infisical agent-vault proxy --domain http://localhost:8088 --port 17323 \
-     --enrollment-token <token>
-   ```
+   Use the installed version's documented private enrollment input. If it only
+   accepts a token argument, stop and arrange enrollment through the service
+   owner. Do not put the token in a shell command.
 
    The systemd user unit `~/.config/systemd/user/agent-vault-proxy.service` then
    starts the proxy without the token and restarts it on failure. Enable linger
@@ -97,8 +96,11 @@ Done on this machine. On a new machine:
    proxy address, the vault identity client id, and the client secret.
 
 5. Install the wrappers from `scripts/agent-vault/`: copy `with-vault`,
-   `with-secrets`, and `with-secrets.mjs` together to `~/.local/bin`, and copy
-   the PowerShell wrappers, `with-secrets.mjs`, and `shim/sitecustomize.py`
-   under the Windows config directory. Set `DEV_SETUP_ROOT` to the checkout
-   when the wrappers are copied outside it. See
-   [`secrets.md`](secrets.md).
+   `with-secrets`, `with-secrets.mjs`, and all its modules together to
+   `~/.local/bin`: `with-secrets-args.mjs`, `with-secrets-env.mjs`,
+   `with-secrets-envrc.mjs`, `with-secrets-policy.mjs`,
+   `with-secrets-resolve.mjs`, `with-secrets-run.mjs`, and
+   `with-secrets-store.mjs`. Include the same Node modules beside the
+   PowerShell wrappers under the Windows config directory, along with
+   `shim/sitecustomize.py`. Set `DEV_SETUP_ROOT` to the checkout when the
+   wrappers are copied outside it. See [`secrets.md`](secrets.md).

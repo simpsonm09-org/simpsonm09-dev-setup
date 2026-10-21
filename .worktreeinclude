@@ -1,1 +1,1 @@
-services/infisical/.env
+# Never include credential files in worktree copies.

@@ -6,6 +6,7 @@ param(
     [string] $GlobalSkillsDir = (Join-Path $env:USERPROFILE '.agents\skills'),
     [string] $T3UserDataDir = (Join-Path $env:USERPROFILE '.t3\userdata'),
     [string] $OutputPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'docs\workspace-environment.snapshot.json'),
+    [string] $FixtureRoot,
     [switch] $Write
 )
 
@@ -17,9 +18,30 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-function Read-IfExists([string] $Path) {
-    if (Test-Path -LiteralPath $Path -PathType Leaf) { return (Get-Content -LiteralPath $Path -Raw) }
-    return $null
+function Get-FileMetadata([string] $Path) {
+    $result = [ordered]@{ exists = $false; size = $null; lastWriteTime = $null }
+    if (Test-Path -LiteralPath $Path -PathType Leaf) {
+        $file = Get-Item -LiteralPath $Path -Force
+        $result.exists = $true
+        $result.size = $file.Length
+        $result.lastWriteTime = $file.LastWriteTimeUtc.ToString('o')
+    }
+    return $result
+}
+
+function Write-Snapshot($Snapshot) {
+    $json = $Snapshot | ConvertTo-Json -Depth 12
+    if ($Write) {
+        [IO.File]::WriteAllText($OutputPath, $json + "`n", [Text.UTF8Encoding]::new($false))
+        Write-Host "Wrote $OutputPath"
+    } else {
+        Write-Host $json
+    }
+}
+
+# Fixture mode exits before any host, profile, registry, or executable probe.
+if ($FixtureRoot) {
+    $OpenCodeConfigDir = Join-Path $FixtureRoot '.config/opencode'
 }
 
 function Get-Names([string] $Directory, [string] $Filter = '*') {
@@ -52,24 +74,27 @@ function Get-T3AppVersion {
     return $null
 }
 
-function Test-ConfigMatch([string] $Shared, [string] $Target) {
-    if (-not (Test-Path -LiteralPath $Shared -PathType Leaf)) { return $false }
-    if (-not (Test-Path -LiteralPath $Target -PathType Leaf)) { return $false }
-    $a = [string](Get-Content -LiteralPath $Shared -Raw)
-    $b = [string](Get-Content -LiteralPath $Target -Raw)
-    return (($a -replace "`r`n", "`n") -ceq ($b -replace "`r`n", "`n"))
-}
-
-$osInfo = Get-CimInstance Win32_OperatingSystem
-
 $config = $null
 foreach ($name in @('opencode.jsonc', 'opencode.json')) {
     $path = Join-Path $OpenCodeConfigDir $name
     if (Test-Path -LiteralPath $path -PathType Leaf) {
-        $config = [ordered]@{ path = $path; content = (Read-IfExists $path) }
+        $config = Get-FileMetadata $path
         break
     }
 }
+
+if ($FixtureRoot) {
+    Write-Snapshot ([ordered]@{
+        opencode = [ordered]@{
+            config = $config
+            globalAgentsMd = Get-FileMetadata (Join-Path $OpenCodeConfigDir 'AGENTS.md')
+        }
+        wsl = [ordered]@{ wslConfig = Get-FileMetadata (Join-Path $FixtureRoot '.wslconfig') }
+    })
+    exit 0
+}
+
+$osInfo = Get-CimInstance Win32_OperatingSystem
 
 $zedShared = Join-Path (Split-Path -Parent $PSScriptRoot) 'settings\windows\zed\settings.json'
 $nocttyShared = Join-Path (Split-Path -Parent $PSScriptRoot) 'settings\windows\noctty\config.ghostty'
@@ -77,12 +102,12 @@ $tools = [ordered]@{
     zed     = [ordered]@{
         shared        = $zedShared
         target        = Join-Path $env:APPDATA 'Zed\settings.json'
-        matchesShared = Test-ConfigMatch $zedShared (Join-Path $env:APPDATA 'Zed\settings.json')
+        metadata      = Get-FileMetadata (Join-Path $env:APPDATA 'Zed\settings.json')
     }
     noctty  = [ordered]@{
         shared        = $nocttyShared
         target        = Join-Path $env:LOCALAPPDATA 'noctty\config.ghostty'
-        matchesShared = Test-ConfigMatch $nocttyShared (Join-Path $env:LOCALAPPDATA 'noctty\config.ghostty')
+        metadata      = Get-FileMetadata (Join-Path $env:LOCALAPPDATA 'noctty\config.ghostty')
     }
 }
 
@@ -94,7 +119,7 @@ $snapshot = [ordered]@{
     workspace   = $Workspace
     opencode    = [ordered]@{
         config        = $config
-        globalAgentsMd = Read-IfExists (Join-Path $OpenCodeConfigDir 'AGENTS.md')
+        globalAgentsMd = Get-FileMetadata (Join-Path $OpenCodeConfigDir 'AGENTS.md')
         globalAgents   = Get-Names (Join-Path $OpenCodeConfigDir 'agents')
         globalSkills   = Get-Names $GlobalSkillsDir
     }
@@ -119,19 +144,11 @@ $snapshot = [ordered]@{
         profile = if ((Get-PSDrive -Name C).Free / 1GB -ge 40) { 'storage-ample' } else { 'storage-constrained' }
     }
     wsl         = [ordered]@{
-        wslConfig = Read-IfExists (Join-Path $env:USERPROFILE '.wslconfig')
+        wslConfig = Get-FileMetadata (Join-Path $env:USERPROFILE '.wslconfig')
         disks     = @(Get-PhysicalDisk -ErrorAction SilentlyContinue | ForEach-Object {
             [ordered]@{ name = $_.FriendlyName; media = "$($_.MediaType)"; bus = "$($_.BusType)"; gb = [math]::Round($_.Size / 1GB, 0) }
         })
     }
 }
 
-$json = $snapshot | ConvertTo-Json -Depth 12
-if ($Write) {
-    $utf8 = New-Object System.Text.UTF8Encoding($false)
-    [IO.File]::WriteAllText($OutputPath, $json + "`n", $utf8)
-    Write-Host "Wrote $OutputPath"
-} else {
-    Write-Host $json
-    Write-Host "Audit only. Rerun with -Write to save."
-}
+Write-Snapshot $snapshot

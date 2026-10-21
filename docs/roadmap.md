@@ -19,7 +19,7 @@ management repositories sat at the workspace root.
 
 - [x] **MCP setup** (see [`planning.md`](planning.md))
   - [x] Confirm the layer fragments merge into `opencode.jsonc`: `context7`, `grep_app`, `sequential-thinking`, `github`, `playwright`, `chrome-devtools`, `postman`.
-  - [x] Put `GITHUB_MCP_TOKEN` in `settings/.env`, ran `scripts/Import-Secrets.ps1 -Apply`, and restarted OpenChamber.
+  - [x] Historical (retired importer; do not repeat): put `GITHUB_MCP_TOKEN` in `settings/.env`, ran `scripts/Import-Secrets.ps1 -Apply`, and restarted OpenChamber.
   - [x] Confirm the `github` server connects. An authenticated GitHub MCP call returned `simpsonm09` with the private repositories visible.
   - [x] Keep `sqlite` disabled unless a Docker-backed server is wanted.
 - [x] **Validate PStack integration (structural)** — `verify-workspace-install.py` passes (56 skills); `stack.lock.json` records the three layers and the plugin pin matches.
