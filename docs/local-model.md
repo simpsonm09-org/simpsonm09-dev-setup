@@ -31,10 +31,12 @@ Caution: the Ubuntu package installs a `llama-server` systemd unit. After instal
 Use a model you already have. The model is your choice; this repository does not name or download one. Run the server in its own terminal, replacing the placeholder with the path to a `.gguf` file:
 
 ```bash
-llama-server -m <path-to-model.gguf> --host 127.0.0.1 --port 18080
+llama-server -m <path-to-model.gguf> --host 127.0.0.1 --port 18080 -c 65536
 ```
 
 On Windows, use `llama-server.exe` if the bare name is not found.
+
+Give the server a context of at least 64k tokens (`-c 65536`) when the workspace layers are installed. pstack and the organization and personal plugins add their skills and the workspace instructions to Pi's prompt, which comes to about 48k tokens before your first message. With a 32k context the first turn fails because the prompt does not fit. A larger context uses more GPU or system memory for the KV cache. If 64k does not fit, use a smaller quantization or a smaller model rather than a shorter context.
 
 Bind to `127.0.0.1` only. Never use `0.0.0.0`, which accepts connections from other machines. Run the server on the same OS as Pi, because `127.0.0.1` refers to that OS. Stop the server with Ctrl+C.
 
@@ -48,7 +50,7 @@ In PowerShell, use `Invoke-RestMethod http://127.0.0.1:18080/v1/models`. A respo
 
 ## 4. Point Pi at it
 
-Pi takes its providers from `models.json` in the workspace's `.pi/agent` folder. Add an OpenAI-compatible provider whose base URL is `http://127.0.0.1:18080/v1`. That base URL is the only value this guide sets. maxstack does not write this file. For how Pi itself is set up, see [Pi (maxstack)](https://github.com/simpsonm09-org/simpsonm09-maxstack/blob/main/docs/t3-setup.md#pi-maxstack).
+Pi takes its providers from `models.json` in the workspace's `.pi/agent` folder. Add an OpenAI-compatible provider whose base URL is `http://127.0.0.1:18080/v1`, and set the model's `contextWindow` to the same value as the server's `-c` (65536 above). The two must agree: a larger `contextWindow` than the server allows makes long turns fail, and a smaller one makes Pi compact early. These two values are the only ones this guide sets. maxstack does not write this file. For how Pi itself is set up, see [Pi (maxstack)](https://github.com/simpsonm09-org/simpsonm09-maxstack/blob/main/docs/t3-setup.md#pi-maxstack).
 
 ## Other local servers
 
