@@ -33,6 +33,7 @@ test:
     node scripts/check-worktreeinclude.mjs
     node scripts/check-secret-consumers.mjs
     node --test --test-concurrency=1 scripts/secret-consumers.test.mjs
+    node --test --test-concurrency=1 scripts/litellm.test.mjs
     node --test --test-concurrency=1 scripts/secret-copies.test.mjs
     node --test --test-concurrency=1 scripts/tools.test.mjs
     node --test --test-concurrency=1 scripts/setup-ops.test.mjs

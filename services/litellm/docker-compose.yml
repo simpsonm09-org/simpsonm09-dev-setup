@@ -1,0 +1,48 @@
+name: model-gateway
+
+services:
+  proxy:
+    image: ${LITELLM_IMAGE:-ghcr.io/berriai/litellm:v1.106.2@sha256:7294b90f868c5c38c99b83021c7ba46f9b439e95f8e32964c925c7d2563a03f7}
+    restart: unless-stopped
+    command:
+      - --config
+      - /app/config.yaml
+      - --port
+      - "4000"
+      - --num_workers
+      - "1"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Required private host interface; never use a wildcard or public address.
+      - "${LITELLM_BIND_ADDRESS:?Set the homelab private interface}:${LITELLM_PORT:-4000}:4000"
+    environment:
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:?Broker injection required}
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?Broker injection required}
+      DATABASE_URL: postgresql://litellm:${POSTGRES_PASSWORD:?Broker injection required}@db:5432/litellm
+      LOCAL_LLAMA_BASE_URL: ${LOCAL_LLAMA_BASE_URL:?Set the local llama endpoint}
+      LITELLM_TELEMETRY_DISABLED: "true"
+      LITELLM_LOG: ERROR
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+
+  db:
+    image: ${POSTGRES_IMAGE:-postgres:16.10-alpine3.22@sha256:029660641a0cfc575b14f336ba448fb8a75fd595d42e1fa316b9fb4378742297}
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: litellm
+      POSTGRES_DB: litellm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Broker injection required}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U litellm -d litellm
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pg_data:

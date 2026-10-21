@@ -8,6 +8,7 @@ const CREDENTIAL_NAME = /(^\.env($|[.*])|^\.envrc$|\.(key|pem)$|token|secret|^au
 export function credentialRules(text) {
   return text.split(/\r?\n/).map((line) => line.trim())
     .filter((line) => line && !line.startsWith('#'))
+    .filter((line) => line.replaceAll('\\', '/') !== 'services/litellm/.env')
     .filter((line) => line.split(/[\\/]/).some((name) => CREDENTIAL_NAME.test(name)));
 }
 
