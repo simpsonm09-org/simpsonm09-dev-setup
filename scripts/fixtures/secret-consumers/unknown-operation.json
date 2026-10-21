@@ -1,0 +1,4 @@
+{
+  "consumers": [{ "consumer": "fixture", "brokerIdentity": "Fixture-Runner", "bundle": "fixture", "credentialNames": ["FIXTURE_API_KEY"], "operations": ["run-any-command-SENTINEL-NOT-A-SECRET-1234"] }],
+  "agentEnvironmentAllowlist": []
+}
