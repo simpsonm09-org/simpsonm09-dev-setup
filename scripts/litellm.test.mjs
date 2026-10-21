@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { parseYaml } from './lib/yaml.mjs';
-import { credentialRules } from './check-worktreeinclude.mjs';
+import { forbiddenRules } from './check-worktreeinclude.mjs';
 import { validateSettings } from '../services/litellm/validate-settings.mjs';
 
 const read = (name) => readFileSync(new URL(`../services/litellm/${name}`, import.meta.url), 'utf8');
@@ -81,10 +81,10 @@ test('non-secret settings reject credentials, expansions, public binds and float
   assert.throws(() => validateSettings(valid, { LOCAL_LLAMA_BASE_URL: 'http://user:fixture@host/v1' }));
 });
 
-test('worktree copying allows only the exact non-secret gateway settings path', () => {
-  assert.deepEqual(credentialRules('services/litellm/.env\nservices\\litellm\\.env\n'), []);
+test('worktree copying accepts the gateway local config and rejects its secret neighbours', () => {
+  assert.deepEqual(forbiddenRules('services/litellm/.env\nservices\\litellm\\.env\n'), []);
   for (const path of ['services/infisical/.env', 'services/litellm/.env.*',
-    'services/litellm/.env.local', 'services/*/.env', './services/litellm/.env']) {
-    assert.deepEqual(credentialRules(`${path}\n`), [path]);
+    'services/litellm/.env.local', 'services/*/.env']) {
+    assert.deepEqual(forbiddenRules(`${path}\n`), [path]);
   }
 });

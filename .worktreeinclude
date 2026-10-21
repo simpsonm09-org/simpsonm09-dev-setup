@@ -1,3 +1,8 @@
-# Never include credential files in worktree copies.
-# This service's .env contains allowlisted non-secret settings only.
+# Worktree copies stay on this machine. Copied files are never committed or uploaded.
+#
+# Copy only local config `.env` files: gitignored, non-secret settings, with a tracked
+# `.env.example` scaffold. Do not list credential files: keys, tokens, auth and
+# credential files, `.env.*`, `.envrc*`, or the known secret sources
+# (`settings/.env`, `services/infisical/.env`). Secrets belong in the broker.
+# Rules name exact files. Wildcards and directories are rejected by `just test`.
 services/litellm/.env

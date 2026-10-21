@@ -222,9 +222,15 @@ For the implementation decisions and verification limits, see
 
 ## Worktree copies and snapshots
 
-`.worktreeinclude` must never list credential files. `just test` checks inclusion
-rules by name without opening their targets. The owner must manually remove
-existing credential copies from old worktrees; changing the rule does not delete them.
+`.worktreeinclude` copies local config `.env` files between worktrees on the same
+machine. A copy stays local: it is gitignored, never committed, and never uploaded.
+Only exact `.env` paths are allowed, such as `services/litellm/.env`. The rule
+rejects `.env.*`, `.envrc*`, key, token, auth and credential files, wildcards and
+directories. It also rejects the known secret sources `settings/.env` and
+`services/infisical/.env`. Secrets and personal data stay out of every `.env` file
+and go to the broker. `just test` checks the rules by name without opening their
+targets. The owner must manually remove existing credential copies from old
+worktrees; changing the rule does not delete them.
 
 Environment snapshots record only file existence, size, and last write time for
 configuration files. They no longer capture config, instruction, or WSL file
