@@ -10,8 +10,8 @@ import { credentialRules } from './check-worktreeinclude.mjs';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SENTINEL = 'SENTINEL-NOT-A-SECRET-1234';
 
-function child(command, args) {
-  return spawnSync(command, args, { encoding: 'utf8', windowsHide: true, timeout: 30000 });
+function child(command, args, env = process.env) {
+  return spawnSync(command, args, { encoding: 'utf8', windowsHide: true, timeout: 30000, env });
 }
 
 test('worktree includes reject credential names without opening any listed path', () => {
@@ -73,7 +73,9 @@ function fixtureSnapshot(t, variant) {
     args = [shellPath(join(HERE, 'get-workspace-environment-snapshot.sh')),
       '--fixture-root', shellPath(root), shellPath(out)];
   }
-  const audit = child(command, args);
+  // The script is Windows-only; give pwsh on other hosts a profile folder so its defaults resolve.
+  const env = { ...process.env, USERPROFILE: process.env.USERPROFILE ?? root };
+  const audit = child(command, args, env);
   if (variant === 'powershell' && audit.error?.code === 'ENOENT') {
     t.skip('PowerShell is unavailable');
     return;
@@ -85,7 +87,7 @@ function fixtureSnapshot(t, variant) {
   assert.equal(snapshot.opencode.config.exists, true);
   assert.equal(snapshot.opencode.config.size, Buffer.byteLength(config));
   assert.equal(snapshot.opencode.globalAgentsMd.size, SENTINEL.length);
-  const written = child(command, [...args, variant === 'powershell' ? '-Write' : '--write']);
+  const written = child(command, [...args, variant === 'powershell' ? '-Write' : '--write'], env);
   assert.equal(written.status, 0, written.stderr);
   const json = readFileSync(out, 'utf8');
   assert.ok(!`${written.stdout}${written.stderr}${json}`.includes(SENTINEL));
