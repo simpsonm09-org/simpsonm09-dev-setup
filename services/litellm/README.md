@@ -170,6 +170,20 @@ Digests came from public `Docker-Content-Digest` response headers for the
 They pin multi-platform indexes. No image was pulled. Overrides also require a
 tag and digest. PostgreSQL is an explicit 16.x pilot pin, not the latest patch.
 
+Before the first start, and again before any pin change, verify the LiteLLM
+image signature with the public key pinned to a commit, as the
+[release notes](https://github.com/BerriAI/litellm/releases/tag/v1.106.2)
+recommend, and keep the digest only if verification passes:
+
+```bash
+cosign verify \
+  --key https://raw.githubusercontent.com/BerriAI/litellm/0112e53046018d726492c814b3644b7d376029d0/cosign.pub \
+  ghcr.io/berriai/litellm:v1.106.2@sha256:7294b90f868c5c38c99b83021c7ba46f9b439e95f8e32964c925c7d2563a03f7
+```
+
+A valid signature proves the image came from LiteLLM's release pipeline, not
+that it is free of vulnerabilities.
+
 The [DeepSeek prefix](https://docs.litellm.ai/docs/providers/deepseek) selects
 `deepseek/deepseek-chat`. The [compatible-endpoint guide](https://docs.litellm.ai/docs/providers/openai_compatible)
 recommends [the `llamafile/` adapter](https://docs.litellm.ai/docs/providers/llamafile)
