@@ -65,5 +65,5 @@ Write-Host "Large write (${LargeMb} MB + fsync): ext4 $ext4Large ms, drvfs $drvf
 Write-Host "Windows mount compared: $DrvfsRoot against ext4 under ~"
 
 if ($smallRatio -ge 3 -or $largeRatio -ge 3) {
-    Write-Host 'Cross-filesystem I/O is expensive here. Keep heavy Linux-side I/O in the ext4 working area (~/work).'
+    Write-Host 'Cross-filesystem I/O is expensive here. Keep heavy Linux-side I/O in the ext4 working area (~/.cache/workspace-builds).'
 }
