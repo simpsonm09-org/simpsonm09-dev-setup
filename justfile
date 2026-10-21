@@ -30,7 +30,12 @@ aislop:
 # Check the workspace wiring without cloning anything.
 test:
     node scripts/workspace.mjs
-    node --test scripts/tools.test.mjs scripts/setup-ops.test.mjs scripts/lib/yaml.test.mjs scripts/with-secrets.test.mjs
+    node scripts/check-worktreeinclude.mjs
+    node --test --test-concurrency=1 scripts/secret-copies.test.mjs
+    node --test --test-concurrency=1 scripts/tools.test.mjs
+    node --test --test-concurrency=1 scripts/setup-ops.test.mjs
+    node --test --test-concurrency=1 scripts/lib/yaml.test.mjs
+    node --test --test-concurrency=1 scripts/with-secrets.test.mjs
 
 # Copy the ignored secrets bootstrap template once. Existing files are preserved.
 secrets-init:
