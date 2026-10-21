@@ -12,6 +12,7 @@ Index for this repository.
 - [Application settings](app-settings.md) inventories Zed, Noctty, and T3 Code.
 - [Secrets](secrets.md) covers the secrets manager setup.
 - [Secrets design](secrets-design.md) records the command boundary and implementation decisions.
+- [LiteLLM gateway pilot](../services/litellm/README.md) is the homelab-only model gateway for API-key models.
 - [Workspace environment](workspace-environment.md) records the machine and app state around the workspace.
 - [WSL performance](wsl-performance.md) measures cross-filesystem I/O.
 - [Publishing](publishing.md) covers pushing the management repositories.

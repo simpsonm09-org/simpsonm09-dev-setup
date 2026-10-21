@@ -1,1 +1,3 @@
 # Never include credential files in worktree copies.
+# This service's .env contains allowlisted non-secret settings only.
+services/litellm/.env

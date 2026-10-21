@@ -3,6 +3,7 @@
 .env
 .env.*
 !.env.example
+services/litellm/.env
 secrets.env
 .envrc
 .envrc.*

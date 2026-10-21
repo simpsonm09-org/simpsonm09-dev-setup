@@ -1,14 +1,15 @@
 # Running the local infrastructure services
 
-`simpsonm09-dev-setup` owns the local services that back development. All run as containers on the Docker Engine inside Ubuntu WSL2.
+`simpsonm09-dev-setup` owns the local services that back development. Infisical, Portainer and DbGate run on Docker Engine inside Ubuntu WSL2. The LiteLLM pilot targets Linux containers on the homelab's Docker Desktop host.
 
 | Service | Role | Address |
 | --- | --- | --- |
 | Infisical | Secrets, certificates, and privileged access | `http://localhost:8088` |
 | Portainer CE | Docker and Compose stack management | `https://localhost:9443` |
 | DbGate | Database manager for SQL, NoSQL, and Redis | `http://localhost:3000` |
+| LiteLLM pilot | API model routing, client keys and spend state | Private homelab interface, port `4000` |
 
-Each service publishes on the WSL2 NAT network. Windows reaches it through the WSL2 localhost forward, and the NAT network is not routable from the LAN, so the services stay local to this machine. Do not bind the published ports to `127.0.0.1`, because the WSL2 localhost forward only reaches ports that listen on all interfaces.
+The three workstation services publish on the WSL2 NAT network. Windows reaches them through the WSL2 localhost forward, and the NAT network is not routable from the LAN, so they stay local to this machine. Do not bind their published ports to `127.0.0.1`, because the WSL2 localhost forward only reaches ports that listen on all interfaces. LiteLLM instead requires a specific private homelab interface.
 
 After a Windows or WSL restart, the forward can miss ports that Docker publishes during boot. If a service does not load at `localhost`, restart the containers so the forward picks them up:
 
@@ -72,6 +73,14 @@ DbGate runs on the Docker engine and can only reach a database on the same netwo
 ```bash
 docker network connect infisical_infisical dbgate
 ```
+
+## LiteLLM pilot
+
+The [LiteLLM pilot](litellm/README.md) shares DeepSeek and local Qwen routes with
+separate, short-lived keys for OpenCode and Pi. It is homelab-only. Its operator
+launchers run under the broker service account and fetch three startup secrets
+from Infisical; agents must never run them. Its `.env` holds non-secret settings
+only. See its README for pins, private networking and acceptance checks.
 
 ## Backups
 
