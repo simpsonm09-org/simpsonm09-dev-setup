@@ -1,5 +1,5 @@
 {
   "readme": true,
-  "features": ["docs/secrets.md", "docs/secrets-design.md", "services/litellm/README.md"],
+  "features": ["docs/secrets.md", "docs/secrets-design.md", "docs/features/gateway-preflight.md", "services/litellm/README.md"],
   "diagrams": []
 }

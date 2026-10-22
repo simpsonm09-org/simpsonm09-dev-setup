@@ -60,6 +60,35 @@ With the broker login already supplied, from this directory:
 bash ./start-gateway.sh prod PROJECT_ID https://INFISICAL_HOST/api
 ```
 
+### Plan mode
+
+Run the read-only preflight before credentials or a deployment exist. This is
+the only gateway command an agent session may run; a real launch stays
+operator-only.
+
+```powershell
+just gateway-plan
+./start-gateway.ps1 -Plan
+./start-gateway.ps1 -Plan -Settings .env
+```
+
+```bash
+just gateway-plan
+bash ./start-gateway.sh --plan
+bash ./start-gateway.sh --plan --settings .env
+```
+
+Plan mode never calls `infisical run`, `docker compose up|config|ps|logs`, the
+secret store, or local model, and it starts no container. It performs only
+bounded local CLI version probes. It reads no `.env`
+unless `--settings`/`-Settings` names one; without that path it reports settings
+as unverified instead of reading an implicit file. Output is one value-free line
+per check in fixed order plus a ready/not-ready line. Exit codes are 0 ready,
+1 not ready, and 2 usage. `ready` means the local observations passed; it does
+not prove the host, the store, TLS, the identity, or the local model endpoint
+work. The check list, data shape, failure modes, and remaining live limits are
+in [Gateway preflight](../../docs/features/gateway-preflight.md).
+
 The launchers use `infisical run --env=... --path=/model-gateway -- docker compose
 ... up -d` with explicit project, domain and tag. Imports, recursion, reference
 expansion and personal overrides are disabled. CLI logging is error-only and
