@@ -27,6 +27,10 @@ lint-fix:
 aislop:
     npx --yes aislop@0.16.1 ci
 
+# Print the read-only LiteLLM gateway preflight plan and change nothing.
+gateway-plan *args:
+    node services/litellm/plan.mjs {{args}}
+
 # Check the workspace wiring without cloning anything.
 test:
     node scripts/workspace.mjs
