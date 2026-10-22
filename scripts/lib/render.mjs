@@ -49,6 +49,13 @@ export function sectionPackages(section) {
   return [section.package];
 }
 
+// npm installers receive a strict exact version as a separate argv value.
+export function pinnedVersion(tool) {
+  return typeof tool.version === 'string' && /^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$/.test(tool.version)
+    ? tool.version
+    : null;
+}
+
 function isDeferred(tool, section) {
   const optIn = section.requiresExplicitOptIn ?? tool.requiresExplicitOptIn;
   const byDefault = section.installByDefault ?? tool.installByDefault ?? true;
@@ -74,7 +81,10 @@ function renderWslPackages(manifest) {
         snapPackages.push({ id: tool.id, package: pkg, classic: section.classic ?? false });
       }
     } else if (section.manager === 'npm') {
-      for (const pkg of sectionPackages(section)) npmPackages.push({ id: tool.id, package: pkg });
+      const version = pinnedVersion(tool);
+      for (const pkg of sectionPackages(section)) {
+        npmPackages.push(version ? { id: tool.id, package: pkg, version } : { id: tool.id, package: pkg });
+      }
     } else if (section.manager === 'manual') {
       manualTools[tool.id] = {
         url: section.url ?? null,
@@ -117,6 +127,7 @@ function renderBrewfile(manifest) {
   return `${lines.join('\n')}\n`;
 }
 
+// The full manifest as data installers read.
 function renderPlan(manifest) {
   return `${JSON.stringify({ generatedBy: 'scripts/tools.mjs', ...manifest }, null, 2)}\n`;
 }

@@ -36,7 +36,8 @@
     },
     {
       "id": "infisical",
-      "package": "@infisical/cli"
+      "package": "@infisical/cli",
+      "version": "0.44.6"
     },
     {
       "id": "playwright-cli",

@@ -12,7 +12,8 @@
 #   tools[]        one logical tool per capability
 #     id, name, role, kind (app|cli), consumers (human|agent)
 #     equivalents  cross-platform stand-ins
-#     policy       latest | vendor-auto-update | store-managed | <pinned version>
+#     policy       latest | vendor-auto-update | store-managed
+#     version      exact pinned package version, when a compatibility need requires it
 #     installByDefault, requiresExplicitOptIn, note
 #     windows/wsl/macos  optional per-platform realization
 #       manager    winget | msstore | scoop | brew | apt | snap | npm | manual
@@ -23,6 +24,9 @@
 #       formula/cask  brew formula or cask
 #       url        manual download page
 #       fallback   ordered chain tried when the primary manager lacks the package
+#
+# A tool-level version is an exact package pin. npm installers compose
+# package@version from it, while policy continues to describe update behavior.
 
 version: 1
 ubuntuRelease: "26.04"
@@ -500,6 +504,8 @@ tools:
       - human
       - agent
     policy: latest
+    version: "0.44.6"
+    note: "Intentionally pinned to the version the gateway launchers in services/litellm accept. Move the pin and the launcher version check in the same change; see docs/versioning.md."
     windows:
       manager: npm
       package: "@infisical/cli"
