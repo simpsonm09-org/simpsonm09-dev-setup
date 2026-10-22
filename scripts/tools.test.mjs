@@ -455,17 +455,24 @@ test('apply-tools.sh hands npm a pinned spec on the macOS path', (t) => {
 });
 
 test('apply-tools.ps1 hands npm a pinned spec on the Windows path', (t) => {
+  if (process.platform !== 'win32') return t.skip('the Windows path fixture requires Windows');
   const probe = spawnSync('pwsh', ['-Command', '(Get-Command pwsh).Source'], { windowsHide: true, encoding: 'utf8' });
   if (probe.error || probe.status !== 0) return t.skip('pwsh is not available');
   const stub = mkdtempSync(join(tmpdir(), 'tools-ps1-pin-'));
   try {
     writeFileSync(join(stub, 'npm.cmd'), '@echo off\r\necho CALL:%1^|%2^|%3\r\nexit /b 0\r\n');
+    writeFileSync(join(stub, 'winget.exe.cmd'), '@echo off\r\nexit /b 0\r\n');
+    writeFileSync(join(stub, 'scoop.cmd'), '@echo off\r\nexit /b 0\r\n');
+    writeFileSync(join(stub, 'wsl.exe.cmd'), '@echo off\r\nexit /b 0\r\n');
     const result = spawnSync(probe.stdout.trim(), ['-File', 'scripts/apply-tools.ps1', 'apply'], {
       windowsHide: true,
       cwd: REPO_ROOT,
       encoding: 'utf8',
       env: { ...process.env, PATH: stub },
     });
+    assert.equal(result.error, undefined, result.error?.message);
+    assert.equal(typeof result.status, 'number');
+    assert.equal(result.status, 0, result.stderr);
     // The stub prints each of the three argv values in a delimited line, so the
     // Windows path is observable without a real npm or network.
     const npmCalls = result.stdout.split(/\r?\n/).filter((line) => line.startsWith('CALL:'));
