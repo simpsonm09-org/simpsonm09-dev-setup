@@ -5,10 +5,6 @@ import { fileURLToPath } from 'node:url';
 import { validateSettings } from './validate-settings.mjs';
 
 export const REQUIRED_INFISICAL_VERSION = '0.44.6';
-const VERSION_OPTIONS = {
-  encoding: 'utf8', shell: false, windowsHide: true, timeout: 5000,
-  maxBuffer: 4096, stdio: ['ignore', 'pipe', 'ignore'],
-};
 
 function version(output, pattern) {
   const line = String(output ?? '').split(/\r?\n/, 1)[0].trim();
@@ -71,9 +67,17 @@ function readExplicitSettings(path) {
   }
 }
 
-export function collectProbes({ env = process.env, run = spawnSync } = {}) {
+export function collectProbes({ env = process.env, run } = {}) {
   const runProbe = (tool, args, parse) => {
-    const result = run(tool, args, VERSION_OPTIONS);
+    const result = run
+      ? run(tool, args, {
+        encoding: 'utf8', shell: false, windowsHide: true, timeout: 5000,
+        maxBuffer: 4096, stdio: ['ignore', 'pipe', 'ignore'],
+      })
+      : spawnSync(tool, args, {
+        encoding: 'utf8', shell: false, windowsHide: true, timeout: 5000,
+        maxBuffer: 4096, stdio: ['ignore', 'pipe', 'ignore'],
+      });
     if (result.error) return { found: false, version: null };
     if (result.status !== 0) return { found: true, version: null };
     return { found: true, version: parse(result.stdout) };
@@ -93,7 +97,7 @@ function parseArgs(args) {
   throw new Error('usage');
 }
 
-export function runPlan({ args = [], env = process.env, probes, runProbe = spawnSync } = {}) {
+export function runPlan({ args = [], env = process.env, probes, runProbe } = {}) {
   let path;
   try { path = parseArgs(args); } catch {
     return { exitCode: 2, stdout: '', stderr: 'usage: node plan.mjs [--settings PATH]\n' };

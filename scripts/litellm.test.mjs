@@ -200,7 +200,11 @@ test('version probes use only bounded non-shell argv', () => {
   const probes = collectProbes({ env: { INFISICAL_TOKEN: 'synthetic' }, run: (file, args, options) => {
     calls.push([file, args]);
     assert.equal(options.shell, false);
+    assert.equal(options.windowsHide, true);
     assert.equal(options.timeout, 5000);
+    assert.equal(options.maxBuffer, 4096);
+    assert.deepEqual(options.stdio, ['ignore', 'pipe', 'ignore']);
+    assert.equal(options.encoding, 'utf8');
     if (file === 'node') return { status: 0, stdout: 'v24.20.0\n' };
     if (file === 'infisical') return { status: 0, stdout: `infisical version ${REQUIRED_INFISICAL_VERSION}\n` };
     if (args[0] === 'compose') return { status: 0, stdout: '2.39.4\n' };
