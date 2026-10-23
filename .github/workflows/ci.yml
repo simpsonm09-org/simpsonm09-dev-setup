@@ -48,3 +48,25 @@ jobs:
         uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
       - name: Check the workspace wiring
         run: just test
+
+  local-model-windows:
+    if: github.repository_owner == 'simpsonm09-org'
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Require PowerShell 7
+        shell: pwsh
+        run: |
+          if ($PSVersionTable.PSVersion.Major -lt 7) {
+            throw "PowerShell 7 or newer is required; found $($PSVersionTable.PSVersion)."
+          }
+      - name: Run the local model lifecycle tests
+        run: node --test --test-concurrency=1 scripts/local-model.test.mjs
