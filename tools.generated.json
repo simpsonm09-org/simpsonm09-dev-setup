@@ -597,6 +597,8 @@
         "agent"
       ],
       "policy": "latest",
+      "version": "0.44.6",
+      "note": "Intentionally pinned to the version the gateway launchers in services/litellm accept. Move the pin and the launcher version check in the same change; see docs/versioning.md.",
       "windows": {
         "manager": "npm",
         "package": "@infisical/cli"

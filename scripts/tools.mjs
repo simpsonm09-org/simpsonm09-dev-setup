@@ -15,9 +15,13 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { parseYaml } from './lib/yaml.mjs';
-import { consumesAgent, installLabel, platformInstall, renderArtifacts, sectionPackages } from './lib/render.mjs';
+import { consumesAgent, installLabel, pinnedVersion, platformInstall, renderArtifacts, sectionPackages } from './lib/render.mjs';
 
-export { parseYaml, renderArtifacts };
+export { parseYaml, renderArtifacts, pinnedVersion };
+
+export const POLICY_KEYWORDS = new Set(['latest', 'vendor-auto-update', 'store-managed']);
+const EXACT_VERSION = /^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$/;
+const NPM_PACKAGE = /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/;
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = resolve(HERE, '..');
@@ -146,9 +150,21 @@ export function validateManifest(manifest) {
       && (!Array.isArray(tool.equivalents) || tool.equivalents.some((entry) => typeof entry !== 'string'))) {
       errors.push(`${tool.id}: equivalents must be a list of strings`);
     }
+    if (tool.policy !== undefined && !POLICY_KEYWORDS.has(tool.policy)) errors.push(`${tool.id}: policy must be ${[...POLICY_KEYWORDS].join(', ')}`);
+    if (tool.version !== undefined && (typeof tool.version !== 'string' || !EXACT_VERSION.test(tool.version))) {
+      errors.push(`${tool.id}: version must be an exact version like 0.44.6`);
+    }
     const platforms = PLATFORMS.filter((platform) => tool[platform] !== undefined);
     if (platforms.length === 0) errors.push(`${tool.id}: needs at least one platform section`);
     for (const platform of platforms) sectionErrors(tool, platform, tool[platform], errors);
+    for (const platform of platforms) {
+      const section = tool[platform];
+      if (section?.manager === 'npm') {
+        for (const pkg of sectionPackages(section)) {
+          if (typeof pkg !== 'string' || !NPM_PACKAGE.test(pkg)) errors.push(`${tool.id}.${platform}: npm package must be a safe package name`);
+        }
+      }
+    }
   }
   return errors;
 }

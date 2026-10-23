@@ -96,6 +96,7 @@ for tool in plan.get("tools", []):
         continue
     values = {"id": tool.get("id", "")}
     values.update(section)
+    values["version"] = tool.get("version", "")
     print("\t".join(str(values.get(field, "")) for field in fields))
 PY
 }
@@ -117,11 +118,15 @@ PY
 }
 
 install_npm() {
-  local id="$1" package="$2"
+  local id="$1" package="$2" version="${3:-}"
+  local spec="$package"
+  if [[ -n "$version" ]]; then
+    spec="$package@$version"
+  fi
   if command -v npm >/dev/null 2>&1; then
-    npm install -g "$package"
+    npm install -g "$spec"
   else
-    printf 'npm is not installed; install %s manually: npm install -g %s\n' "$id" "$package"
+    printf 'npm is not installed; install %s manually: npm install -g %s\n' "$id" "$spec"
   fi
 }
 
@@ -221,10 +226,10 @@ apply_linux() {
       printf 'snap is not installed; install snapd, then: sudo snap install %s%s\n' "$name" "$([[ "$classic" == "True" || "$classic" == "true" ]] && echo ' --classic')"
     fi
   done < <(json_rows snapPackages id package classic)
-  while IFS=$'\t' read -r id package; do
+  while IFS=$'\t' read -r id package version; do
     [[ -n "$id" ]] || continue
-    install_npm "$id" "$package"
-  done < <(json_rows npmPackages id package)
+    install_npm "$id" "$package" "$version"
+  done < <(json_rows npmPackages id package version)
   python3 - "$packages_file" <<'PY'
 import json,sys
 d = json.load(open(sys.argv[1]))
@@ -240,11 +245,11 @@ apply_macos() {
   require_file "$brewfile"
   require_file "$plan_file"
   brew bundle --file "$brewfile"
-  local id package
-  while IFS=$'\t' read -r id package; do
+  local id package version
+  while IFS=$'\t' read -r id package version; do
     [[ -n "$id" ]] || continue
-    install_npm "$id" "$package"
-  done < <(macos_rows npm id package)
+    install_npm "$id" "$package" "$version"
+  done < <(macos_rows npm id package version)
   local line
   while IFS= read -r line; do
     [[ -n "$line" ]] || continue

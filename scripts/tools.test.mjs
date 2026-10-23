@@ -11,6 +11,7 @@ import {
   agentToolLines,
   checkArtifacts,
   loadManifest,
+  pinnedVersion,
   planLines,
   renderArtifacts,
   REPO_ROOT,
@@ -99,7 +100,7 @@ test('renderWslPackages covers every WSL manager tools.yaml declares', () => {
   assert.deepEqual(wsl.npmPackages, [
     { id: 'postman-cli', package: 'postman-cli' },
     { id: 'newman', package: 'newman' },
-    { id: 'infisical', package: '@infisical/cli' },
+    { id: 'infisical', package: '@infisical/cli', version: '0.44.6' },
     { id: 'playwright-cli', package: '@playwright/cli' },
     { id: 'chrome-devtools', package: 'chrome-devtools' },
     { id: 'ctx7', package: 'ctx7' },
@@ -107,6 +108,49 @@ test('renderWslPackages covers every WSL manager tools.yaml declares', () => {
   assert.deepEqual(wsl.snapPackages, [{ id: 'terminal', package: 'ghostty', classic: true }]);
   assert.equal(wsl.manualTools.opencode.updateCommand, 'opencode upgrade');
   assert.deepEqual(wsl.deferredTools.map((entry) => entry.id), ['docker', 'llama-cpp']);
+});
+
+test('the Infisical pin reaches every npm install path as data', () => {
+  const manifest = loadManifest(REPO_ROOT);
+  const generated = JSON.parse(renderArtifacts(manifest)['tools.generated.json']);
+  const generatedInfisical = generated.tools.find((entry) => entry.id === 'infisical');
+  assert.equal(generatedInfisical.version, '0.44.6');
+  // Unversioned npm tools keep their exact shape and carry no version key.
+  const generatedNewman = generated.tools.find((entry) => entry.id === 'newman');
+  assert.equal('version' in generatedNewman, false);
+});
+
+test('version and npm package validation keep install arguments safe', () => {
+  const tool = { id: 'x', name: 'X', role: 'r', kind: 'cli', consumers: ['human'], wsl: { manager: 'npm', package: 'x' } };
+  for (const policy of ['latest', 'vendor-auto-update', 'store-managed']) {
+    assert.deepEqual(validateManifest({ tools: [{ ...tool, policy }] }), []);
+  }
+  for (const version of ['0.44.6', '0.44.6-rc.1']) {
+    assert.deepEqual(validateManifest({ tools: [{ ...tool, version }] }), []);
+  }
+  for (const version of ['0.44.6 --unsafe-perm', '^0.44.6', '0.44.6 --prefix=/tmp/x', 'latest', '0.44']) {
+    const errors = validateManifest({ tools: [{ ...tool, version }] });
+    assert.equal(errors.length, 1, version);
+    assert.match(errors[0], /x: version must be/);
+  }
+  for (const packageName of ['x --evil', 'x@latest', '$(touch marker)', '../x', '@scope/x && echo bad']) {
+    const errors = validateManifest({ tools: [{ ...tool, wsl: { manager: 'npm', package: packageName } }] });
+    assert.ok(errors.some((error) => /npm package must be a safe package name/.test(error)), packageName);
+  }
+  assert.equal(pinnedVersion({ version: 'latest --unsafe-perm' }), null);
+  assert.equal(pinnedVersion({ version: '0.44.6' }), '0.44.6');
+});
+
+test('the gateway launchers require exactly the tools.yaml Infisical pin', () => {
+  const manifest = loadManifest(REPO_ROOT);
+  const pin = pinnedVersion(manifest.tools.find((tool) => tool.id === 'infisical'));
+  assert.equal(pin, '0.44.6');
+  for (const file of ['start-gateway.sh', 'start-gateway.ps1']) {
+    const text = readFileSync(join(REPO_ROOT, 'services', 'litellm', file), 'utf8');
+    const required = /infisical version ([0-9]+\.[0-9]+\.[0-9]+)/.exec(text);
+    assert.ok(required, `${file} states the Infisical version it requires`);
+    assert.equal(required[1], pin, `${file} required version must equal the tools.yaml pin`);
+  }
 });
 
 test('renderBrewfile comments out the opt-in docker-desktop cask', () => {
@@ -329,6 +373,117 @@ test('the ps1 twin exits non-zero when an install fails', (t) => {
       env: { ...process.env, PATH: stub },
     });
     assert.equal(result.status, 1, result.stderr);
+  } finally {
+    rmSync(stub, { recursive: true, force: true });
+  }
+});
+
+// The stub tests below never install anything: every manager on the path is a
+// recording shell stub, and the exercised scripts read only committed files.
+function bashHasPython3Probe() {
+  const probe = spawnSync('bash', ['-c', 'command -v python3'], { windowsHide: true, encoding: 'utf8' });
+  return !probe.error && probe.status === 0;
+}
+
+// Every manager the apply paths can call is a stub: sudo, apt-get, snap, and
+// brew just exit 0, and npm prints each argv entry with a call marker.
+const stubApplyScript = (platform) => [
+  'set -e',
+  `uname() { echo ${platform}; }`,
+  'export -f uname',
+  'd=$(mktemp -d) || exit 99',
+  'trap \'rm -rf "$d"\' EXIT',
+  'export LOG="$d/npm-args.log"',
+  'cat > "$d/sudo" <<\'EOF\'',
+  '#!/bin/sh',
+  'exec "$@"',
+  'EOF',
+  'for name in apt-get snap brew npm; do',
+  'cat > "$d/$name" <<\'EOF\'',
+  '#!/bin/sh',
+  'exit 0',
+  'EOF',
+  'done',
+  'cat > "$d/npm" <<\'EOF\'',
+  '#!/bin/sh',
+  'echo CALL',
+  'for arg in "$@"; do echo "$arg"; done',
+  'exit 0',
+  'EOF',
+  'chmod +x "$d"/*',
+  'PATH="$d:$PATH" bash scripts/apply-tools.sh apply',
+].join('\n');
+
+test('apply-tools.sh hands npm a pinned spec on the Linux path', (t) => {
+  if (!bashHasPython3Probe()) return t.skip('bash python3 is not available');
+  const result = spawnSync('bash', ['-s'], { windowsHide: true, cwd: REPO_ROOT, encoding: 'utf8', input: stubApplyScript('Linux') });
+  if (result.error) return t.skip('bash is not available');
+  assert.equal(result.status, 0, result.stderr);
+  const calls = result.stdout.split(/\r?\n/).filter(Boolean);
+  const npmCalls = [];
+  for (let index = 0; index < calls.length; index += 1) {
+    if (calls[index] === 'CALL') npmCalls.push(calls.slice(index + 1, index + 4));
+  }
+  assert.deepEqual(npmCalls, [
+    ['install', '-g', 'postman-cli'],
+    ['install', '-g', 'newman'],
+    ['install', '-g', '@infisical/cli@0.44.6'],
+    ['install', '-g', '@playwright/cli'],
+    ['install', '-g', 'chrome-devtools'],
+    ['install', '-g', 'ctx7'],
+  ]);
+});
+
+test('apply-tools.sh hands npm a pinned spec on the macOS path', (t) => {
+  if (!bashHasPython3Probe()) return t.skip('bash python3 is not available');
+  const result = spawnSync('bash', ['-s'], { windowsHide: true, cwd: REPO_ROOT, encoding: 'utf8', input: stubApplyScript('Darwin') });
+  if (result.error) return t.skip('bash is not available');
+  assert.equal(result.status, 0, result.stderr);
+  const calls = result.stdout.split(/\r?\n/).filter(Boolean);
+  const npmCalls = [];
+  for (let index = 0; index < calls.length; index += 1) {
+    if (calls[index] === 'CALL') npmCalls.push(calls.slice(index + 1, index + 4));
+  }
+  assert.deepEqual(npmCalls, [
+    ['install', '-g', 'postman-cli'],
+    ['install', '-g', 'newman'],
+    ['install', '-g', '@infisical/cli@0.44.6'],
+    ['install', '-g', '@playwright/cli'],
+    ['install', '-g', 'chrome-devtools'],
+    ['install', '-g', 'ctx7'],
+  ]);
+});
+
+test('apply-tools.ps1 hands npm a pinned spec on the Windows path', (t) => {
+  if (process.platform !== 'win32') return t.skip('the Windows path fixture requires Windows');
+  const probe = spawnSync('pwsh', ['-Command', '(Get-Command pwsh).Source'], { windowsHide: true, encoding: 'utf8' });
+  if (probe.error || probe.status !== 0) return t.skip('pwsh is not available');
+  const stub = mkdtempSync(join(tmpdir(), 'tools-ps1-pin-'));
+  try {
+    writeFileSync(join(stub, 'npm.cmd'), '@echo off\r\necho CALL:%1^|%2^|%3\r\nexit /b 0\r\n');
+    writeFileSync(join(stub, 'winget.exe.cmd'), '@echo off\r\nexit /b 0\r\n');
+    writeFileSync(join(stub, 'scoop.cmd'), '@echo off\r\nexit /b 0\r\n');
+    writeFileSync(join(stub, 'wsl.exe.cmd'), '@echo off\r\nexit /b 0\r\n');
+    const result = spawnSync(probe.stdout.trim(), ['-File', 'scripts/apply-tools.ps1', 'apply'], {
+      windowsHide: true,
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+      env: { ...process.env, PATH: stub },
+    });
+    assert.equal(result.error, undefined, result.error?.message);
+    assert.equal(typeof result.status, 'number');
+    assert.equal(result.status, 0, result.stderr);
+    // The stub prints each of the three argv values in a delimited line, so the
+    // Windows path is observable without a real npm or network.
+    const npmCalls = result.stdout.split(/\r?\n/).filter((line) => line.startsWith('CALL:'));
+    assert.deepEqual(npmCalls, [
+      'CALL:install|-g|postman-cli',
+      'CALL:install|-g|newman',
+      'CALL:install|-g|@infisical/cli@0.44.6',
+      'CALL:install|-g|@playwright/cli',
+      'CALL:install|-g|chrome-devtools',
+      'CALL:install|-g|ctx7',
+    ], result.stdout);
   } finally {
     rmSync(stub, { recursive: true, force: true });
   }

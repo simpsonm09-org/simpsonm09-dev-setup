@@ -187,7 +187,10 @@ function Invoke-Tool($Tool, $Section, [bool] $Execute) {
             }
         }
         'npm' {
-            if ($Execute) { Install-Npm $Tool.id (Get-Field $Section 'package') } else { Write-Host "install  $($Tool.id) npm $(Get-Field $Section 'package')" }
+            $package = Get-Field $Section 'package'
+            $version = Get-Field $Tool 'version'
+            $spec = if ($version) { "$package@$version" } else { $package }
+            if ($Execute) { Install-Npm $Tool.id $spec } else { Write-Host "install  $($Tool.id) npm $spec" }
         }
         'manual' {
             $url = Get-Field $Section 'url'
