@@ -51,6 +51,9 @@ elseif ($Scenario -eq 'start-wait-throws') { $waitWorker = { param($process, $bu
 elseif ($Scenario -eq 'readiness-missing-file') {
     $waitWorker = { param($process, $budget, $grace) $exited = $process.WaitForExit(5000); if (-not $exited) { throw 'Synthetic worker did not exit.' }; Remove-Item -LiteralPath $script:startStdoutPath -Force -ErrorAction SilentlyContinue; [pscustomobject]@{ processId = $process.Id; timedOut = $false; exited = $true; exitCode = $process.ExitCode; waitError = $null; terminationError = $null; elapsedMilliseconds = 10 } }
 }
+elseif ($Scenario -like 'readiness-*') {
+    $waitWorker = { param($process, $budget, $grace) $exited = $process.WaitForExit(5000); if (-not $exited) { throw 'Synthetic readiness worker did not exit within its fixture bound.' }; [pscustomobject]@{ processId = $process.Id; timedOut = $false; exited = $true; exitCode = $process.ExitCode; waitError = $null; terminationError = $null; elapsedMilliseconds = 10 } }
+}
 $result = Invoke-SupervisedLifecycleCore -RunDirectory $runDirectory -ExpectedContextTokens 98304 -StartBudgetSeconds 1 -StopBudgetSeconds 1 -TerminationGraceSeconds 1 -StateDirectory $stateDirectory `
     -StartWorker { param($stdout, $stderr) Start-SyntheticWorker -Action Start -StdoutPath $stdout -StderrPath $stderr } `
     -StopWorker {

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { once } from 'node:events';
-import { join, relative, resolve, sep } from 'node:path';
+import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import test from 'node:test';
 
@@ -47,7 +47,7 @@ test('supervised lifecycle command previews by default without creating its fres
   assert.equal(preview.startBudgetSeconds, 240);
   assert.ok(preview.helperArguments.includes('-ServerArgumentPrefix'));
   assert.ok(preview.helperArguments.includes('--synthetic flag'));
-  assert.deepEqual(preview.stopHelperArguments, ['-Action', 'Stop', '-StateDirectory', join(runDirectory, 'state')]);
+  assert.deepEqual(preview.stopHelperArguments, ['-Action', 'Stop', '-StateDirectory', canonicalFuturePath(join(runDirectory, 'state'))]);
   assert.ok(preview.startWorkerArguments.includes('-ServerArgumentPrefix'));
   assert.ok(preview.stopWorkerArguments.includes('-Action') && preview.stopWorkerArguments.includes('Stop'));
   assert.equal(existsSync(runDirectory), false, 'preview does not create the run directory');
@@ -88,7 +88,7 @@ test('supervised lifecycle public command refuses unsafe paths and runs the synt
   assert.equal(result.exitCode, 0);
   assert.equal(result.ownershipRecordRemains, false);
   const argv = JSON.parse(readFileSync(join(models, 'argv.json'), 'utf8'));
-  assert.ok(argv.includes('--models-dir') && argv.includes(models), 'spaced model path arrived as one router argument');
+  assert.ok(argv.includes('--models-dir') && argv.includes(canonicalFuturePath(models)), 'spaced model path arrived as one router argument');
   assert.ok(argv.includes('--port') && argv.includes('19270'));
   const aclScript = `$paths=@('${runDirectory.replaceAll("'", "''")}', '${join(runDirectory, 'snapshot').replaceAll("'", "''")}'); $sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value; foreach($p in $paths){$a=Get-Acl -LiteralPath $p; if(-not $a.AreAccessRulesProtected){throw "ACL inheritance remains on $p"}; $rules=$a.GetAccessRules($true,$false,[Security.Principal.SecurityIdentifier]); if($rules.Count -ne 1 -or $rules[0].IdentityReference.Value -ne $sid){throw "Unexpected ACL principals on $p"}}; (Get-Acl -LiteralPath '${root.replaceAll("'", "''")}').Sddl`;
   const aclCheck = spawnSync('pwsh', ['-NoLogo', '-NoProfile', '-Command', aclScript], { windowsHide: true, encoding: 'utf8', timeout: 10_000 });
@@ -170,6 +170,19 @@ function fixtureArgs(port) {
   return ['-ServerPath', process.execPath, '-ServerArgumentPrefix', fixture,
     '-ModelsDirectory', relativeModels, '-ModelId', 'synthetic-model', '-Port', String(port),
     '-ContextTokens', '98304', '-MaxOutputTokens', '8192', '-StateDirectory', state];
+}
+
+function canonicalFuturePath(path) {
+  if (process.platform !== 'win32') return resolve(path);
+  const suffix = [];
+  let existingAncestor = resolve(path);
+  while (!existsSync(existingAncestor)) {
+    suffix.unshift(basename(existingAncestor));
+    const parent = dirname(existingAncestor);
+    if (parent === existingAncestor) throw new Error(`No existing ancestor for ${path}`);
+    existingAncestor = parent;
+  }
+  return join(realpathSync.native(existingAncestor), ...suffix);
 }
 
 let root;
