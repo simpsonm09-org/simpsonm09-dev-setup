@@ -34,7 +34,9 @@ Use a model you already have. The model is your choice; this repository does not
 llama-server -m <path-to-model.gguf> --host 127.0.0.1 --port 18080 -c 65536
 ```
 
-On Windows, use `llama-server.exe` if the bare name is not found.
+On Windows, use `llama-server.exe` if the bare name is not found. The LiteLLM
+gateway's `.env.example` points its `local-qwen` route at this port through
+`host.docker.internal`; keep the two in step.
 
 Give the server a context of at least 64k tokens (`-c 65536`) when the workspace layers are installed. pstack and the organization and personal plugins add their skills and the workspace instructions to Pi's prompt, which comes to about 48k tokens before your first message. With a 32k context the first turn fails because the prompt does not fit. A larger context uses more GPU or system memory for the KV cache. If 64k does not fit, use a smaller quantization or a smaller model rather than a shorter context.
 
