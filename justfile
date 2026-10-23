@@ -31,6 +31,10 @@ aislop:
 gateway-plan *args:
     node services/litellm/plan.mjs {{args}}
 
+# Run offline checks for the opt-in local Pi model lifecycle helper.
+local-model-check:
+    node --test --test-concurrency=1 scripts/local-model.test.mjs
+
 # Check the workspace wiring without cloning anything.
 test:
     node scripts/workspace.mjs
