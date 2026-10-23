@@ -2,13 +2,17 @@ import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { once } from 'node:events';
-import { join, relative, resolve, sep } from 'node:path';
+import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 import test from 'node:test';
 
 const helper = resolve('scripts/local-model.ps1');
 const fixture = resolve('scripts/fixtures/local-model-router.mjs');
 const identityFixture = resolve('scripts/fixtures/process-identity-capture.test.ps1');
+const lifecycleRunner = resolve('scripts/local-model-verify.ps1');
+const lifecycleRunnerFixture = resolve('scripts/fixtures/local-model-lifecycle-runner.test.ps1');
+const lifecycleRunnerWorker = resolve('scripts/fixtures/local-model-supervisor-worker.ps1');
+const lifecycleRunnerLibrary = resolve('scripts/lib/local-model-lifecycle-runner.psm1');
 const pwshCheck = spawnSync('pwsh', ['-NoLogo', '-NoProfile', '-Command', '$PSVersionTable.PSVersion.Major'], { windowsHide: true, encoding: 'utf8' });
 if (pwshCheck.error?.code !== 'ENOENT') assertCompleted(pwshCheck, 'PowerShell version check');
 const hasPwsh = pwshCheck.error?.code !== 'ENOENT' && pwshCheck.status === 0;
@@ -29,6 +33,92 @@ test('PowerShell availability gates the lifecycle suite and identifies a missing
   }
   assert.equal(pwshCheck.status, 0, 'PowerShell version probe completed successfully');
   assert.ok(Number(pwshCheck.stdout.trim()) >= 7, 'PowerShell 7 or newer is required');
+});
+
+test('supervised lifecycle command previews by default without creating its fresh run directory', { skip: !hasPwsh }, () => {
+  const runDirectory = join(root, 'preview run path with spaces');
+  const result = assertCompleted(spawnSync('pwsh', ['-NoLogo', '-NoProfile', '-File', lifecycleRunner,
+    '-RunDirectory', runDirectory, '-ServerPath', join(root, 'llama server.exe'), '-ServerArgumentPrefix', '--synthetic flag', '-ModelsDirectory', join(root, 'models with spaces'), '-ModelId', 'synthetic-model'],
+  { windowsHide: true, encoding: 'utf8', timeout: 10_000 }), 'supervised lifecycle preview');
+  assert.equal(result.status, 0, `${result.stderr}\n${result.stdout}`);
+  const preview = JSON.parse(result.stdout);
+  assert.equal(preview.mode, 'preview');
+  assert.equal(preview.runDirectoryIsFresh, true);
+  assert.equal(preview.startBudgetSeconds, 240);
+  assert.ok(preview.helperArguments.includes('-ServerArgumentPrefix'));
+  assert.ok(preview.helperArguments.includes('--synthetic flag'));
+  assert.deepEqual(preview.stopHelperArguments, ['-Action', 'Stop', '-StateDirectory', canonicalFuturePath(join(runDirectory, 'state'))]);
+  assert.ok(preview.startWorkerArguments.includes('-ServerArgumentPrefix'));
+  assert.ok(preview.stopWorkerArguments.includes('-Action') && preview.stopWorkerArguments.includes('Stop'));
+  assert.equal(existsSync(runDirectory), false, 'preview does not create the run directory');
+});
+
+test('supervised lifecycle public command refuses unsafe paths and runs the synthetic router with private artifacts', { skip: !canRunLifecycle }, () => {
+  const models = join(root, 'models with spaces');
+  mkdirSync(models);
+  const runDirectory = join(root, 'public run with spaces');
+  const existing = join(root, 'existing run');
+  mkdirSync(existing);
+  writeFileSync(join(existing, 'keep.txt'), 'preserve');
+  const args = ['-RunDirectory', runDirectory, '-ServerPath', process.execPath, '-ServerArgumentPrefix', fixture,
+    '-ModelsDirectory', models, '-ModelId', 'synthetic-model', '-Port', '19270'];
+  const parentAclScript = `$p='${root.replaceAll("'", "''")}'; (Get-Acl -LiteralPath $p).Sddl`;
+  const parentAclBefore = spawnSync('pwsh', ['-NoLogo', '-NoProfile', '-Command', parentAclScript], { windowsHide: true, encoding: 'utf8' });
+  assert.equal(parentAclBefore.status, 0, parentAclBefore.stderr);
+
+  const existingRefusal = spawnSync('pwsh', ['-NoLogo', '-NoProfile', '-File', lifecycleRunner, ...args.slice(0, 1).concat(existing, ...args.slice(2))], { windowsHide: true, encoding: 'utf8', timeout: 10_000 });
+  assert.notEqual(existingRefusal.status, 0, 'an existing run directory is refused in preview');
+  assert.equal(readFileSync(join(existing, 'keep.txt'), 'utf8'), 'preserve', 'preview refusal does not overwrite an existing directory');
+  const missingParent = join(root, 'missing parent', 'run');
+  const missingPreview = spawnSync('pwsh', ['-NoLogo', '-NoProfile', '-File', lifecycleRunner, '-RunDirectory', missingParent,
+    '-ServerPath', process.execPath, '-ModelsDirectory', models, '-ModelId', 'synthetic-model'],
+  { windowsHide: true, encoding: 'utf8', timeout: 10_000 });
+  assert.notEqual(missingPreview.status, 0, 'preview also refuses a missing parent');
+  assert.equal(existsSync(join(root, 'missing parent')), false, 'preview refusal does not create a missing parent');
+  const missingRefusal = spawnSync('pwsh', ['-NoLogo', '-NoProfile', '-File', lifecycleRunner, '-Run', '-RunDirectory', missingParent,
+    '-ServerPath', process.execPath, '-ServerArgumentPrefix', fixture, '-ModelsDirectory', models, '-ModelId', 'synthetic-model', '-Port', '19270'],
+  { windowsHide: true, encoding: 'utf8', timeout: 10_000 });
+  assert.notEqual(missingRefusal.status, 0, 'a missing parent is refused before server start');
+  assert.equal(existsSync(join(root, 'missing parent')), false);
+
+  const run = spawnSync('pwsh', ['-NoLogo', '-NoProfile', '-File', lifecycleRunner, '-Run', ...args], { windowsHide: true, encoding: 'utf8', timeout: 30_000 });
+  assert.equal(run.status, 0, `${run.stderr}\n${run.stdout}`);
+  const result = JSON.parse(run.stdout);
+  assert.equal(result.outcome, 'ready-stopped');
+  assert.equal(result.exitCode, 0);
+  assert.equal(result.ownershipRecordRemains, false);
+  const argv = JSON.parse(readFileSync(join(models, 'argv.json'), 'utf8'));
+  assert.ok(argv.includes('--models-dir') && argv.includes(canonicalFuturePath(models)), 'spaced model path arrived as one router argument');
+  assert.ok(argv.includes('--port') && argv.includes('19270'));
+  const aclScript = `$paths=@('${runDirectory.replaceAll("'", "''")}', '${join(runDirectory, 'snapshot').replaceAll("'", "''")}'); $sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value; foreach($p in $paths){$a=Get-Acl -LiteralPath $p; if(-not $a.AreAccessRulesProtected){throw "ACL inheritance remains on $p"}; $rules=$a.GetAccessRules($true,$false,[Security.Principal.SecurityIdentifier]); if($rules.Count -ne 1 -or $rules[0].IdentityReference.Value -ne $sid){throw "Unexpected ACL principals on $p"}}; (Get-Acl -LiteralPath '${root.replaceAll("'", "''")}').Sddl`;
+  const aclCheck = spawnSync('pwsh', ['-NoLogo', '-NoProfile', '-Command', aclScript], { windowsHide: true, encoding: 'utf8', timeout: 10_000 });
+  assert.equal(aclCheck.status, 0, aclCheck.stderr || aclCheck.stdout);
+  assert.equal(aclCheck.stdout.trim(), parentAclBefore.stdout.trim(), 'fresh run protection leaves the existing parent ACL unchanged');
+});
+
+test('public lifecycle run refuses non-Windows execution when PowerShell is available', { skip: !hasPwsh || isWindows }, () => {
+  const runDirectory = join(root, 'nonwindows run');
+  const result = spawnSync('pwsh', ['-NoLogo', '-NoProfile', '-File', lifecycleRunner, '-Run', '-RunDirectory', runDirectory,
+    '-ServerPath', process.execPath, '-ModelsDirectory', join(root, 'models'), '-ModelId', 'synthetic-model'],
+  { windowsHide: true, encoding: 'utf8', timeout: 10_000 });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /only on Windows/);
+  assert.equal(existsSync(runDirectory), false, 'platform refusal occurs before artifact creation');
+});
+
+test('supervised lifecycle bounds synthetic workers and preserves failed-stop evidence', { skip: !canRunLifecycle }, async () => {
+  for (const scenario of ['success', 'start-timeout', 'start-failure', 'start-never-exits', 'start-wait-throws', 'stop-failure', 'stop-timeout', 'readiness-malformed', 'readiness-truncated', 'readiness-absent', 'readiness-missing-file', 'readiness-nonnumeric']) {
+    const scenarioRoot = join(root, `supervisor ${scenario} with spaces`);
+    mkdirSync(scenarioRoot);
+    const result = assertCompleted(spawnSync('pwsh', ['-NoLogo', '-NoProfile', '-File', lifecycleRunnerFixture,
+      '-Scenario', scenario, '-TestRoot', scenarioRoot, '-LibraryPath', lifecycleRunnerLibrary, '-WorkerPath', lifecycleRunnerWorker],
+    { windowsHide: true, encoding: 'utf8', timeout: 20_000 }), `supervisor synthetic ${scenario}`);
+    assert.equal(result.status, 0, `${scenario}: ${result.stderr}\n${result.stdout}`);
+    const outcome = JSON.parse(result.stdout.trim().split(/\r?\n/).at(-1));
+    assert.equal(outcome.scenario, scenario);
+    assert.equal(outcome.stopCount, scenario === 'start-never-exits' ? 0 : 1, `${scenario} obeys the bounded cleanup/Stop rule`);
+    assert.ok(outcome.elapsedMilliseconds < 15_000, `${scenario} returns within the bounded fixture window`);
+  }
 });
 
 test('early router exit cleans the router and child without retaining ownership state', { skip: !canRunLifecycle }, () => {
@@ -80,6 +170,19 @@ function fixtureArgs(port) {
   return ['-ServerPath', process.execPath, '-ServerArgumentPrefix', fixture,
     '-ModelsDirectory', relativeModels, '-ModelId', 'synthetic-model', '-Port', String(port),
     '-ContextTokens', '98304', '-MaxOutputTokens', '8192', '-StateDirectory', state];
+}
+
+function canonicalFuturePath(path) {
+  if (process.platform !== 'win32') return resolve(path);
+  const suffix = [];
+  let existingAncestor = resolve(path);
+  while (!existsSync(existingAncestor)) {
+    suffix.unshift(basename(existingAncestor));
+    const parent = dirname(existingAncestor);
+    if (parent === existingAncestor) throw new Error(`No existing ancestor for ${path}`);
+    existingAncestor = parent;
+  }
+  return join(realpathSync.native(existingAncestor), ...suffix);
 }
 
 let root;

@@ -140,6 +140,56 @@ the GPU floor requires `nvidia-smi` to be available. The separate sampler remain
 useful as an operator record, but is not the enforcement mechanism. Mac and homelab
 hosts have not been checked.
 
+## Supervised lifecycle verification
+
+`scripts/local-model-verify.ps1` is an opt-in command for one bounded Start/Stop
+verification attempt. It previews by default. Supply a new run directory whose parent
+already exists, review the preview, then pass `-Run` to execute. The directory must
+not already exist; captures and state are kept there for diagnosis.
+
+```powershell
+pwsh -File scripts/local-model-verify.ps1 `
+  -RunDirectory '<new-empty-attempt-directory>' `
+  -ServerPath '<path-to-llama-server.exe>' `
+  -ModelsDirectory '<path-to-existing-models>' `
+  -ModelId '<exact-existing-model-id>'
+
+pwsh -File scripts/local-model-verify.ps1 `
+  -Run -RunDirectory '<different-new-empty-attempt-directory>' `
+  -ServerPath '<path-to-llama-server.exe>' `
+  -ModelsDirectory '<path-to-existing-models>' `
+  -ModelId '<exact-existing-model-id>'
+```
+
+The runner starts one helper worker, snapshots state before making one explicit
+`Stop` attempt in `finally` after Start exits, and skips `Status`. If bounded
+termination cannot confirm that the exact Start worker exited, it skips Stop to
+avoid racing state writes and reports a nonzero retained-worker failure. It uses
+named PowerShell parameters and preserves argument boundaries for paths containing
+spaces. Default budgets are
+240 seconds for Start (the 180-second readiness setting plus 60 seconds) and 60
+seconds for Stop, followed by a five-second termination grace per worker. Worker
+output is redirected to per-attempt files; the runner bounds the output it reads
+back when checking the Start result.
+
+The runner terminates only the exact Start or Stop worker it launched when that
+worker misses its budget. Worker termination does not prove the server or its
+children stopped. A failed or timed-out Stop, a retained ownership record, or a
+Start worker that remains live is reported as failure and the run directory is
+preserved for owner diagnosis. Success requires a ready response with the expected
+context, a successful final Stop, and no remaining ownership record. Outcomes and
+process exit codes are listed in the [feature release note](features/local-model-lifecycle-verify.md).
+The fresh run directory and snapshot use a current-user-only ACL. Existing parents
+are not changed; paths that pass through reparse points are refused. Run captures
+and helper/server log files have no write-size cap, and synchronous OS, PowerShell,
+and filesystem operations can exceed worker wait budgets. No hard wall-clock, no-orphan, or native
+readiness guarantee is claimed. This command is for synthetic lifecycle verification
+only; it does not establish model fit, Pi readiness, or inference.
+
+Run the named public-command tests through `just local-model-verify-test`. Invoke the
+command directly with `pwsh -File scripts/local-model-verify.ps1`; the Preview output
+shows the Start and Stop helper arguments, including `-ServerArgumentPrefix`.
+
 ## Check and stop
 
 ```powershell

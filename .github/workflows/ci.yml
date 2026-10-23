@@ -48,6 +48,8 @@ jobs:
         uses: jdx/mise-action@08ae2a091c038e1e05ec6f5115dc5c69d5a2a6b8 # v5.1.2
       - name: Check the workspace wiring
         run: just test
+      - name: Check the non-Windows supervised runner guard
+        run: node --test --test-name-pattern="public lifecycle run refuses non-Windows" scripts/local-model.test.mjs
 
   local-model-windows:
     if: github.repository_owner == 'simpsonm09-org'

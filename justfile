@@ -35,6 +35,10 @@ gateway-plan *args:
 local-model-check:
     node --test --test-concurrency=1 scripts/local-model.test.mjs
 
+# Run the named synthetic verification cases for the supervised public command.
+local-model-verify-test:
+    node --test --test-concurrency=1 --test-name-pattern="supervised lifecycle|public lifecycle run" scripts/local-model.test.mjs
+
 # Check the workspace wiring without cloning anything.
 test:
     node scripts/workspace.mjs
