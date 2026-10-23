@@ -46,7 +46,8 @@ capacity target, not a fit guarantee.
 pwsh -File scripts/local-model.ps1 -Action Plan `
   -ServerPath '<path-to-llama-server.exe>' `
   -ModelsDirectory '<path-to-existing-models>' `
-  -ModelId '<exact-existing-model-id>'
+  -ModelId '<exact-existing-model-id>' `
+  -Port 18080
 ```
 
 After reviewing the plan, start explicitly:
@@ -55,7 +56,8 @@ After reviewing the plan, start explicitly:
 pwsh -File scripts/local-model.ps1 -Action Start `
   -ServerPath '<path-to-llama-server.exe>' `
   -ModelsDirectory '<path-to-existing-models>' `
-  -ModelId '<exact-existing-model-id>'
+  -ModelId '<exact-existing-model-id>' `
+  -Port 18080
 ```
 
 The helper binds to `127.0.0.1`, records the PID, executable path and process start

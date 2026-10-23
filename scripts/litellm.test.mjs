@@ -222,7 +222,7 @@ test('the local example endpoint port matches the llama-server instructions', ()
   const url = new URL(endpoint);
   const docs = readFileSync(new URL('../docs/local-model.md', import.meta.url), 'utf8');
   const section = docs.split('## Other local servers')[0];
-  const ports = [...section.matchAll(/--port (\d{1,5})\b/g)].map((match) => match[1]);
+  const ports = [...section.matchAll(/-Port (\d{1,5})\b/g)].map((match) => match[1]);
   assert.ok(ports.length > 0);
   assert.ok(ports.every((port) => port === url.port));
 });

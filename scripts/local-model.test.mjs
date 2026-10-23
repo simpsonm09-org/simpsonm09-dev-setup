@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { once } from 'node:events';
 import { join, relative, resolve, sep } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -31,18 +31,18 @@ test('PowerShell availability gates the lifecycle suite and identifies a missing
   assert.ok(Number(pwshCheck.stdout.trim()) >= 7, 'PowerShell 7 or newer is required');
 });
 
-test('identity failure cleans the router and its unrecorded child', { skip: !canRunLifecycle }, () => {
+test('early router exit cleans the router and child without retaining ownership state', { skip: !canRunLifecycle }, () => {
   const port = 19180;
   const env = { ...process.env, FIXTURE_SPAWN_CHILD_ON_BOOT: '1', FIXTURE_SPAWN_CHILD_THEN_EXIT: '1' };
   const result = run(['-Action', 'Start', ...fixtureArgs(port)], 15_000, env);
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /identity could not be captured|before ownership identity could be recorded/);
+  assert.match(result.stderr, /identity could not be captured|before ownership identity could be recorded|Server exited before becoming ready/);
   const routerPid = Number(readFileSync(join(root, 'models', 'pid.txt'), 'utf8'));
   const childPid = Number(readFileSync(join(root, 'models', 'child-pid.txt'), 'utf8'));
   try {
     assert.equal(requireAlive(routerPid), false, 'failed router is gone');
     assert.equal(requireAlive(childPid), false, 'unrecorded child is gone');
-    assert.equal(existsSync(join(state, 'server.json')), false, 'no ownership record was written');
+    assert.equal(existsSync(join(state, 'server.json')), false, 'no ownership record remains after startup failure');
   } finally {
     if (requireAlive(childPid)) process.kill(childPid, 'SIGKILL');
   }
@@ -114,7 +114,7 @@ test('Plan reports existing paths, explicit router arguments, and budget without
   assert.equal(plan.bind, '127.0.0.1');
   assert.equal(plan.serverExists, true);
   assert.equal(plan.modelsDirectoryExists, true);
-  assert.equal(plan.arguments[2], resolve(relative(process.cwd(), join(root, 'models'))) + sep);
+  assert.equal(plan.arguments[2], realpathSync.native(join(root, 'models')) + sep);
   assert.equal(plan.portInUse, false);
   assert.equal(plan.contextTokens, 98_304);
   assert.equal(plan.maxOutputTokens, 8_192);
@@ -131,7 +131,7 @@ test('Start preserves spaced and trailing-separator paths as distinct argv and S
   const record = JSON.parse(readFileSync(recordPath, 'utf8'));
   const received = JSON.parse(readFileSync(join(root, 'models', 'argv.json'), 'utf8'));
   const modelDirIndex = received.indexOf('--models-dir');
-  assert.equal(received[modelDirIndex + 1], resolve(relative(process.cwd(), join(root, 'models'))) + sep);
+  assert.equal(received[modelDirIndex + 1], realpathSync.native(join(root, 'models')) + sep);
   assert.deepEqual(received.slice(-8, -2), ['-c', '98304', '-np', '1', '--models-max', '1']);
   assert.equal(record.actualContextTokens, 98_304);
   assert.ok(record.children.length >= 1, 'model process child is recorded after load');
@@ -320,7 +320,7 @@ test('Plan resolves relative paths against the PowerShell location', { skip: !ca
     `Set-Location -LiteralPath '${root.replaceAll("'", "''")}'; & '${helper.replaceAll("'", "''")}' -Action Plan -ServerPath '${process.execPath.replaceAll("'", "''")}' -ModelsDirectory '${modelsPath.replaceAll("'", "''")}' -ModelId synthetic-model -StateDirectory '${state.replaceAll("'", "''")}'`], { windowsHide: true, encoding: 'utf8' }), 'relative path Plan');
   assert.equal(result.status, 0, result.stderr);
   const plan = JSON.parse(result.stdout);
-  assert.equal(plan.modelsDirectory, resolve(root, modelsPath));
+  assert.equal(plan.modelsDirectory, realpathSync.native(join(root, modelsPath)));
 });
 
 test('Start and Stop resolve a relative StateDirectory against the same PowerShell location', { skip: !canRunLifecycle }, () => {
