@@ -2,7 +2,7 @@
 
 Keep one canonical clone per project under `D:\dev\simpsonm09\projects\repos\<repo>`. Put linked Git worktrees under `D:\dev\simpsonm09\projects\worktrees\<repo>\<branch>`. In WSL these are under `/mnt/d/dev/simpsonm09/projects/`.
 
-To create every canonical clone at once, run `just workspace --apply` from this repository. It reads the `repo-catalog` roster, clones each repository from the personal fork, and sets the organization as `upstream`. To clone one repository by hand, use the example below.
+To create every canonical clone at once, run `just workspace --apply` from this repository. It reads the `repo-catalog` roster and clones each repository into `projects/repos`. For now it also adds an `upstream` remote for the organization (still spelled `simpsonm09-org` in the script); that remote goes away once the script clones from `simpsonm09-projects` directly. To clone one repository by hand, use the example below.
 
 Example, from Ubuntu WSL:
 
@@ -11,7 +11,7 @@ root=/mnt/d/dev/simpsonm09
 repo="$root/projects/repos/example"
 
 # Create the canonical clone once (GitHub Desktop can also clone it to this exact path).
-gh repo clone simpsonm09/example "$repo"
+gh repo clone simpsonm09-projects/example "$repo"
 
 # Fetch in the canonical clone, then add a linked worktree for a task.
 git -C "$repo" fetch --prune

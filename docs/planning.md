@@ -12,7 +12,7 @@ Deferred so the workspace work can continue. Each item states what is needed and
 
 - [x] **aislop `failBelow`.** Unified at 80 in every repository, including the `repo-standard` template. Sampled scores were 92 to 100 or had zero findings.
 - [x] **`pstack-opencode-plugin` `layer.json`.** Decided against. The installer reads `layer.json` only for `kind: config`, so the plugin descriptor stays in `maxstack/layers.json`.
-- [ ] **Renovate.** The `renovate.json` preset file is present in every repository. Enabling the Renovate app on the `simpsonm09-org` organization needs the GitHub account that owns it.
+- [ ] **Renovate.** The `renovate.json` preset file is present in every repository. Enabling the Renovate app on the `simpsonm09-projects` organization needs the GitHub account that owns it.
 - [x] **`flint init`.** Linter and formatter pins are present in every repository; `pstack-opencode-plugin` now matches its siblings.
 
 ## Repository delivery
