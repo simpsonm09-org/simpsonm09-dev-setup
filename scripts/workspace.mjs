@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Build the workspace from scratch. Clone every repository in the repo-catalog
-// roster into projects/repos, point the organization at the upstream remote,
-// and optionally run the maxstack workspace installer.
+// roster from the organization into projects/repos, and optionally run the
+// maxstack workspace installer.
 //
 // Prints the plan by default. Writes only with --apply or --install.
 // See docs/project-workflow.md.
@@ -9,11 +9,15 @@
 import { chmodSync, copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
 const args = process.argv.slice(2);
-const OWNER = 'simpsonm09';
-const UPSTREAM = 'simpsonm09-org';
+const OWNER = 'simpsonm09-projects';
 const ROSTER_REPO = 'simpsonm09-repo-catalog';
+
+export function repositorySlug(name) {
+  return OWNER + '/' + name;
+}
 
 function flag(name) {
   return args.includes(name);
@@ -58,28 +62,11 @@ function clone(name) {
   if (existsSync(dir)) {
     return true;
   }
-  const target = OWNER + '/' + name;
+  const target = repositorySlug(name);
   if (!act('clone', target + ' -> ' + dir)) {
     return true;
   }
   return spawn('gh', ['repo', 'clone', target, dir]);
-}
-
-function hasRemote(dir, name) {
-  const result = spawnSync('git', ['remote'], { windowsHide: true, cwd: dir, encoding: 'utf8' });
-  return result.status === 0 && result.stdout.split('\n').includes(name);
-}
-
-function addUpstream(name) {
-  const dir = join(reposDir, name);
-  if (existsSync(dir) && hasRemote(dir, 'upstream')) {
-    return true;
-  }
-  const url = 'https://github.com/' + UPSTREAM + '/' + name + '.git';
-  if (!act('upstream', name + ' -> ' + UPSTREAM + '/' + name)) {
-    return true;
-  }
-  return spawn('git', ['remote', 'add', 'upstream', url], dir);
 }
 
 function refExists(dir, ref) {
@@ -169,10 +156,8 @@ function main() {
   const names = roster.repos.map((entry) => entry.name).filter((name) => name !== ROSTER_REPO);
   for (const name of names) {
     clone(name);
-    addUpstream(name);
     ensureTracking(name);
   }
-  addUpstream(ROSTER_REPO);
   ensureTracking(ROSTER_REPO);
 
   for (const name of [...names, ROSTER_REPO]) {
@@ -184,13 +169,15 @@ function main() {
   }
 }
 
-main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
 
-process.stdout.write(
-  `${write ? 'applied' : 'dry run'}  repositories=${planned === 0 ? 'up to date' : planned}\n`,
-);
-if (failures > 0) {
-  process.stderr.write(`failures=${failures}\n`);
-  process.exit(1);
+  process.stdout.write(
+    `${write ? 'applied' : 'dry run'}  repositories=${planned === 0 ? 'up to date' : planned}\n`,
+  );
+  if (failures > 0) {
+    process.stderr.write(`failures=${failures}\n`);
+    process.exit(1);
+  }
+  process.exit(0);
 }
-process.exit(0);

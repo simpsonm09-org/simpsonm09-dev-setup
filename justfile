@@ -42,6 +42,7 @@ local-model-verify-test:
 # Check the workspace wiring without cloning anything.
 test:
     node scripts/workspace.mjs
+    node --test --test-concurrency=1 scripts/workspace.test.mjs
     node scripts/check-worktreeinclude.mjs
     node scripts/check-secret-consumers.mjs
     node --test --test-concurrency=1 scripts/secret-consumers.test.mjs
