@@ -30,7 +30,7 @@ These gate the build. The plan is not final until each has an answer.
 | Remote access | RDP, OpenSSH, or both | Firewall rules and account policy |
 | Services | Infisical, Portainer, and DbGate only, or more | Compose layout and resource sizing |
 | Backup target | External disk, NAS, or offsite | Retention and restore test |
-| Organization | Join `simpsonm09-org`, or stand alone | Rulesets, runner, and Renovate |
+| Organization | Join `simpsonm09-projects`, or stand alone | Rulesets, runner, and Renovate |
 | Power | Uninterruptible supply, or none | Availability expectation |
 
 ## Proposed steps
