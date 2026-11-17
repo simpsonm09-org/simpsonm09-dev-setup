@@ -29,6 +29,7 @@ function makeRoot(t, names) {
 function run(root, args, env = {}) {
   return spawnSync(process.execPath, [WORKSPACE, '--root', root, ...args], {
     encoding: 'utf8',
+    windowsHide: true,
     env: { ...process.env, ...env },
   });
 }
