@@ -10,7 +10,7 @@ repo_paths=(
   simpsonm09-maxstack
   simpsonm09-org-ai-plugin
   simpsonm09-personal-ai-plugin
-  simpsonm09-repo-standard
+  repo-standard
   repo-template
 )
 

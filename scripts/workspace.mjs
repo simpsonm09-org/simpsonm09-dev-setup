@@ -105,7 +105,7 @@ function installHook(name) {
   if (!existsSync(join(dir, '.git'))) {
     return true;
   }
-  const source = join(reposDir, 'simpsonm09-repo-standard', 'templates', 'hooks', 'pre-push');
+  const source = join(reposDir, 'repo-standard', 'templates', 'hooks', 'pre-push');
   if (!existsSync(source)) {
     process.stdout.write(`note  ${source} is missing, so ${name} gets no pre-push hook\n`);
     return true;
