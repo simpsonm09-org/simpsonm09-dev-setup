@@ -9,7 +9,7 @@ import test from 'node:test';
 import { repositorySlug } from './workspace.mjs';
 
 const WORKSPACE = fileURLToPath(new URL('./workspace.mjs', import.meta.url));
-const ROSTER_REPO = 'simpsonm09-repo-catalog';
+const ROSTER_REPO = 'repo-catalog';
 
 // A root with a roster, so the script runs without touching the real workspace.
 // The roster repository itself is present because the script clones it first and

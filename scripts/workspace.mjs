@@ -13,7 +13,7 @@ import { pathToFileURL } from 'node:url';
 
 const args = process.argv.slice(2);
 const OWNER = 'simpsonm09-projects';
-const ROSTER_REPO = 'simpsonm09-repo-catalog';
+const ROSTER_REPO = 'repo-catalog';
 
 export function repositorySlug(name) {
   return OWNER + '/' + name;
