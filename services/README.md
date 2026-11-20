@@ -1,6 +1,6 @@
 # Running the local infrastructure services
 
-`simpsonm09-dev-setup` owns the local services that back development. Infisical, Portainer and DbGate run on Docker Engine inside Ubuntu WSL2. The LiteLLM pilot targets Linux containers on the homelab's Docker Desktop host.
+`dev-setup` owns the local services that back development. Infisical, Portainer and DbGate run on Docker Engine inside Ubuntu WSL2. The LiteLLM pilot targets Linux containers on the homelab's Docker Desktop host.
 
 | Service | Role | Address |
 | --- | --- | --- |
@@ -28,7 +28,7 @@ docker restart infisical-backend portainer dbgate
 Infisical is the single source of truth for secrets. It runs with PostgreSQL and Redis.
 
 ```bash
-cd /mnt/d/dev/simpsonm09/projects/repos/simpsonm09-dev-setup/services/infisical
+cd /mnt/d/dev/simpsonm09/projects/repos/dev-setup/services/infisical
 cp .env.example .env
 # Set ENCRYPTION_KEY and AUTH_SECRET before the first start. Without them the
 # instance cannot decrypt secrets after a restart. See the file header.
@@ -45,7 +45,7 @@ Create one machine identity using Universal Auth and give it the Viewer role on 
 Portainer manages containers and Compose stacks through the Docker socket.
 
 ```bash
-cd /mnt/d/dev/simpsonm09/projects/repos/simpsonm09-dev-setup/services/portainer
+cd /mnt/d/dev/simpsonm09/projects/repos/dev-setup/services/portainer
 docker compose up -d
 ```
 
@@ -62,7 +62,7 @@ Create the administrator account within five minutes of reading the token. Porta
 DbGate views and edits databases in a browser. It supports SQL engines (PostgreSQL, MySQL, MariaDB, SQL Server, Oracle, SQLite, CockroachDB, ClickHouse, Firebird), NoSQL (MongoDB, Apache Cassandra), and Redis.
 
 ```bash
-cd /mnt/d/dev/simpsonm09/projects/repos/simpsonm09-dev-setup/services/dbgate
+cd /mnt/d/dev/simpsonm09/projects/repos/dev-setup/services/dbgate
 docker compose up -d
 ```
 

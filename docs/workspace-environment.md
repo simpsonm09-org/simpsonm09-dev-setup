@@ -5,7 +5,7 @@ This document records the machine-level state outside the repositories that affe
 ## Ownership
 
 - `maxstack` owns AI configuration: the PStack plugin, the agent profiles, the MCP servers, and the workspace `opencode.jsonc`. It installs that bundle into `D:\dev\simpsonm09` only. Neither `maxstack` nor this repository sets a model for OpenCode or Claude Code.
-- `simpsonm09-dev-setup` owns machine and app snapshots plus non-AI dev tooling, including this document and the snapshot script.
+- `dev-setup` owns machine and app snapshots plus non-AI dev tooling, including this document and the snapshot script.
 - `D:\dev\simpsonm09` is the generated workspace. Its root files (`opencode.jsonc`, `.opencode`) are written by `maxstack`.
 
 ## Refresh the snapshot

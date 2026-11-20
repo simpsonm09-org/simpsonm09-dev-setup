@@ -17,7 +17,7 @@ docker run --rm hello-world
 Done on this machine. The four containers run on the WSL Docker Engine. On a new machine:
 
 ```bash
-cd /mnt/d/dev/simpsonm09/projects/repos/simpsonm09-dev-setup/services/infisical
+cd /mnt/d/dev/simpsonm09/projects/repos/dev-setup/services/infisical
 cp .env.example .env
 openssl rand -hex 16   # paste into ENCRYPTION_KEY
 openssl rand -base64 32 # paste into AUTH_SECRET
@@ -27,9 +27,9 @@ docker compose up -d
 Then open `http://localhost:8088` and create the admin account, and follow [`secrets.md`](secrets.md) to create the project and the machine identity. See [`../services/README.md`](../services/README.md).
 
 ```bash
-cd /mnt/d/dev/simpsonm09/projects/repos/simpsonm09-dev-setup/services/portainer
+cd /mnt/d/dev/simpsonm09/projects/repos/dev-setup/services/portainer
 docker compose up -d
-cd /mnt/d/dev/simpsonm09/projects/repos/simpsonm09-dev-setup/services/dbgate
+cd /mnt/d/dev/simpsonm09/projects/repos/dev-setup/services/dbgate
 docker compose up -d
 ```
 
