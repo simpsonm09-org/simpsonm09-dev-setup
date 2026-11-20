@@ -121,7 +121,7 @@ function installHook(name) {
 }
 
 function runInstaller() {
-  const installer = join(reposDir, 'simpsonm09-maxstack', 'scripts', 'Install-Workspace.ps1');
+  const installer = join(reposDir, 'maxstack', 'scripts', 'Install-Workspace.ps1');
   if (!act('install', installer)) {
     return true;
   }
