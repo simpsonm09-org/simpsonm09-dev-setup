@@ -46,7 +46,7 @@ function fakeGh(root) {
 }
 
 test('the roster slug names the organization', () => {
-  assert.equal(repositorySlug('simpsonm09-maxstack'), 'simpsonm09-projects/simpsonm09-maxstack');
+  assert.equal(repositorySlug('maxstack'), 'simpsonm09-projects/maxstack');
 });
 
 test('a dry run plans clones from the organization and no upstream remote', (t) => {
