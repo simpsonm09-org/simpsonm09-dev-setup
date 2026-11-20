@@ -1,4 +1,4 @@
-# simpsonm09-dev-setup working agreements
+# dev-setup working agreements
 
 Repeatable workstation setup for the Windows machines and Ubuntu on WSL2.
 
