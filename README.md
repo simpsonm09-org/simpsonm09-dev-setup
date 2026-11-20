@@ -1,10 +1,10 @@
 # dev-setup
 
-Repeatable workstation setup for the Windows 10 laptop and Windows 11 desktop, with Ubuntu on WSL2. This repository owns general workstation tools and setup documentation; AI prompts, agents, and shared AI workflows belong in [`maxstack`](https://github.com/simpsonm09-projects/simpsonm09-maxstack).
+Repeatable workstation setup for the Windows 10 laptop and Windows 11 desktop, with Ubuntu on WSL2. This repository owns general workstation tools and setup documentation; AI prompts, agents, and shared AI workflows belong in [`maxstack`](https://github.com/simpsonm09-projects/maxstack).
 
 This repository lives in `simpsonm09-projects/dev-setup`. Work happens on a branch
 with a pull request into `main`.
-See [`repo-standard`](https://github.com/simpsonm09-projects/simpsonm09-repo-standard)
+See [`repo-standard`](https://github.com/simpsonm09-projects/repo-standard)
 for the branch model and the protection rules.
 
 ## What it does
@@ -42,5 +42,5 @@ MIT. See [`LICENSE`](LICENSE).
 
 ## Related repositories
 
-- [`maxstack`](https://github.com/simpsonm09-projects/simpsonm09-maxstack) owns the OpenCode and PStack workspace configuration.
-- [`repo-standard`](https://github.com/simpsonm09-projects/simpsonm09-repo-standard) owns the shared CI, linting, security, and governance.
+- [`maxstack`](https://github.com/simpsonm09-projects/maxstack) owns the OpenCode and PStack workspace configuration.
+- [`repo-standard`](https://github.com/simpsonm09-projects/repo-standard) owns the shared CI, linting, security, and governance.
