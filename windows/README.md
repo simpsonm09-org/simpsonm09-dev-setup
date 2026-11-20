@@ -48,7 +48,7 @@ Apply it with `-Apply`. The script refuses to change settings while Zed is runni
 
 ## OpenCode and PStack
 
-OpenCode runtime configuration and PStack are maintained in the separate `simpsonm09-maxstack` repository. Follow that repository's current documentation for workspace setup and removal. Provider credentials stay in OpenCode's local auth store. T3 Code's own settings and thread state are not included; see [`docs/app-settings.md`](../docs/app-settings.md). T3 Code drives the OpenCode and Claude Code providers; its Claude plugin composition is maintained with maxstack.
+OpenCode runtime configuration and PStack are maintained in the separate `maxstack` repository. Follow that repository's current documentation for workspace setup and removal. Provider credentials stay in OpenCode's local auth store. T3 Code's own settings and thread state are not included; see [`docs/app-settings.md`](../docs/app-settings.md). T3 Code drives the OpenCode and Claude Code providers; its Claude plugin composition is maintained with maxstack.
 
 New Postman installs use the current winget version. The current laptop is on 12.29.5; existing installations on other machines are preserved until deliberately upgraded.
 

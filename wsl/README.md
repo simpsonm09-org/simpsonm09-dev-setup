@@ -60,6 +60,6 @@ bash wsl/cleanup-opencode-sessions.sh --apply     # delete them
 
 Options: `--days N` (default 30), `--directory PATH` (default the workspace), `--max N`. The script uses `opencode session list --format json` and `opencode session delete`.
 
-OpenCode runtime configuration and PStack are maintained in the separate `simpsonm09-maxstack` repository. Follow that repository's current documentation for workspace setup and removal. Provider credentials remain in the local OpenCode auth store.
+OpenCode runtime configuration and PStack are maintained in the separate `maxstack` repository. Follow that repository's current documentation for workspace setup and removal. Provider credentials remain in the local OpenCode auth store.
 
 GitHub Desktop is the primary pull/push UI. `gh` is for CLI-only workflows; authenticate it separately if/when you need those workflows. Git identity is per-user local setup: preserve an existing identity; if absent, prompt locally for name/email before making commits rather than hardcoding or asking the user to post it in chat.
