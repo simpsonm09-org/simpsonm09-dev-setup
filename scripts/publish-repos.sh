@@ -9,7 +9,7 @@ case "${1:-}" in
   *) printf 'Usage: %s [--publish]\n' "$0" >&2; exit 2 ;;
 esac
 
-owner="simpsonm09"
+owner="simpsonm09-projects"
 # The repository clones are siblings under projects/repos; reach them from this
 # repository's parent directory.
 repos_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -41,8 +41,8 @@ fi
 command -v gh >/dev/null 2>&1 || { echo 'GitHub CLI (gh) is required.' >&2; exit 1; }
 gh auth status >/dev/null 2>&1 || { echo 'Run `gh auth login` interactively first. Never paste credentials into chat.' >&2; exit 1; }
 account="$(gh api user --jq .login)"
-if [[ "${account,,}" != "$owner" ]]; then
-  printf 'Authenticated GitHub account is %s, expected %s. No remotes changed.\n' "$account" "$owner" >&2
+if ! gh api "orgs/$owner" >/dev/null 2>&1; then
+  printf 'Authenticated account %s cannot see the %s organization. No remotes changed.\n' "$account" "$owner" >&2
   exit 1
 fi
 
